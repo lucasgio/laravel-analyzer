@@ -1,0 +1,40 @@
+---
+description: Core conventions for the laravel-analyzer project
+globs:
+  - "src/**/*.php"
+  - "bin/*"
+alwaysApply: true
+---
+
+# Laravel Analyzer — Project Rules
+
+## Architecture
+
+- `bin/laravel-analyze` → CLI entry point (parses args, calls `Application`)
+- `bin/laravel-analyze-mcp` → MCP server entry point (starts JSON-RPC loop)
+- `src/Console/Application.php` → CLI orchestration
+- `src/Analyzers/BaseAnalyzer.php` → shared file utilities, `scoreToRisk()`
+- `src/Analyzers/*Analyzer.php` → 6 independent analysis modules
+- `src/Reports/ReportGenerator.php` → output rendering (console/json/html/markdown)
+- `src/Mcp/Server.php` → JSON-RPC 2.0 server (stdio)
+- `src/Mcp/ToolHandler.php` → MCP tools bridge to analyzers
+- `src/Mcp/ResourceHandler.php` → MCP readable documentation URIs
+- `src/Mcp/PromptHandler.php` → MCP prompt templates (slash commands)
+
+## Strict Conventions
+
+- **No external composer packages** — pure PHP 8.1+ only
+- **Namespace**: `LaravelAnalyzer\` → `src/` (PSR-4)
+- **Analyzer return shape**: `{ score: int(0-100), metrics: array, issues: array, recommendations: array }`
+- **Risk values**: `LOW` | `MEDIUM` | `HIGH` | `CRITICAL` (English only)
+- **MCP transport**: STDOUT = JSON-RPC messages only; STDERR = logs
+- **All user-facing strings**: English
+
+## Analyzer Contract
+
+Every analyzer in `src/Analyzers/` must:
+1. Extend `BaseAnalyzer`
+2. Implement `analyze(string $projectPath): array`
+3. Return a score between 0 and 100 (integer)
+4. Never import other analyzer classes
+5. Never throw unhandled exceptions from `analyze()`

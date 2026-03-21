@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "laravel-analyzer": {
+      "command": "php",
+      "args": ["bin/laravel-analyze-mcp"],
+      "description": "Laravel Best Practices Analyzer — static analysis for Laravel projects"
+    }
+  }
+}
