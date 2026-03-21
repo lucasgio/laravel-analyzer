@@ -75,8 +75,8 @@ class Application
                 $this->options['threshold'] = (int)substr($arg, 12);
             } elseif ($arg === '--no-color') {
                 $this->options['no_color'] = true;
-            } elseif (!str_starts_with($arg, '--') && is_dir($arg)) {
-                $this->projectPath = realpath($arg);
+            } elseif (!str_starts_with($arg, '--')) {
+                $this->projectPath = is_dir($arg) ? realpath($arg) : $arg;
             }
         }
 
@@ -209,6 +209,8 @@ class Application
 
         if ($avg < $threshold) {
             $this->warning("⚠  Project is below the minimum quality threshold ({$threshold}/100)");
+            echo PHP_EOL;
+            exit(1);
         } else {
             $this->success("✓ Project meets the quality threshold ({$threshold}/100)");
         }
