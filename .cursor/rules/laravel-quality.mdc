@@ -1,0 +1,47 @@
+---
+description: Laravel quality analysis guidance for Cursor AI
+globs:
+  - "**/*.php"
+alwaysApply: false
+---
+
+# Laravel Quality Analysis with laravel-analyzer
+
+When reviewing or analyzing Laravel PHP files, use the laravel-analyzer MCP tools.
+
+## Available MCP Tools
+
+Use these tools via the MCP server (`laravel-analyzer`):
+
+| Tool | When to use |
+|------|------------|
+| `analyze` | Full project quality scan |
+| `analyze_module` | Focus on one dimension (coupling, testing, debt, complexity, security, owasp) |
+| `get_issues` | Get filtered issues by severity |
+| `get_recommendations` | Get prioritized action items |
+
+## Quality Thresholds
+
+| Score | Verdict |
+|-------|---------|
+| ≥ 80 | Good — continue |
+| 60–79 | Acceptable — plan improvements |
+| 40–59 | Concerning — prioritize this sprint |
+| < 40 | Blocking — fix before merging |
+
+## Common Laravel Quality Issues
+
+### Coupling & Cohesion
+- God Classes: > 20 methods or > 500 lines → extract into focused services
+- High coupling: > 10 injected dependencies → apply Interface Segregation
+- Long methods: > 50 lines → extract smaller, named methods
+
+### Security
+- `DB::select("... $var")` → use query bindings
+- `$guarded = []` or `::create($request->all())` → use `$fillable`
+- `{!! $var !!}` → use `{{ $var }}` for user-generated content
+- `md5()` / `sha1()` for passwords → use `Hash::make()`
+
+### Complexity
+- Cyclomatic complexity > 10 → extract logic, use early returns
+- Nesting > 4 levels → use guard clauses and extracted methods
