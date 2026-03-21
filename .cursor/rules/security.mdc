@@ -1,0 +1,46 @@
+---
+description: Security analysis rules for Laravel projects using laravel-analyzer
+globs:
+  - "src/Analyzers/SecurityAnalyzer.php"
+  - "src/Analyzers/OwaspAnalyzer.php"
+  - "src/Mcp/**/*.php"
+alwaysApply: false
+---
+
+# Security Analysis Rules
+
+When working with security-related code in this project or analyzing Laravel applications:
+
+## Run Security Analysis First
+
+Before suggesting security fixes, always gather data:
+1. Call `analyze_module` with `module: "security"` to get Laravel-specific vulnerabilities
+2. Call `analyze_module` with `module: "owasp"` to get OWASP Top 10 mapping
+3. Call `get_issues` with `severity: "CRITICAL"` to prioritize
+
+## OWASP Top 10 (2021) Quick Reference
+
+| Code | Category | Laravel concern |
+|------|----------|-----------------|
+| A01 | Broken Access Control | Missing `$this->authorize()`, IDOR |
+| A02 | Cryptographic Failures | MD5/SHA1, HTTP links, hardcoded secrets |
+| A03 | Injection | Raw SQL, system commands with user input |
+| A04 | Insecure Design | Missing rate limiting, no input validation |
+| A05 | Security Misconfiguration | `APP_DEBUG=true`, wildcard CORS |
+| A06 | Vulnerable Components | Wildcard composer versions, missing lock file |
+| A07 | Auth Failures | Session fixation, missing MFA |
+| A08 | Integrity Failures | Unsafe deserialization, no CI/CD checks |
+| A09 | Logging Failures | No security event logging, log injection |
+| A10 | SSRF | `Http::get($userInput)` without validation |
+
+## Severity Priority Order
+
+CRITICAL → HIGH → MEDIUM → LOW
+
+Never defer CRITICAL issues. Treat CRITICAL security issues as deployment blockers.
+
+## Score Thresholds for Security
+
+- Security score < 50 → block deployment
+- OWASP score < 60 → requires immediate attention
+- Any CRITICAL issue → must be fixed before merge

@@ -1,0 +1,70 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * laravel-analyze-mcp — MCP server entry point.
+ *
+ * Starts a JSON-RPC 2.0 MCP server over stdio, exposing the Laravel Analyzer
+ * as tools, resources, and prompts for AI agent clients.
+ *
+ * Compatible with: Claude Code, Cursor, Windsurf, Gemini CLI, VS Code Copilot.
+ *
+ * Usage:
+ *   php bin/laravel-analyze-mcp [project-path]
+ *
+ * The project-path defaults to the current working directory.
+ * All JSON-RPC tools also accept a runtime project_path argument.
+ *
+ * IMPORTANT: STDOUT is reserved for JSON-RPC messages. All logs go to STDERR.
+ */
+
+// ─────────────────────────────────────────
+// BOOTSTRAP
+// ─────────────────────────────────────────
+
+$rootDir = dirname(__DIR__);
+
+// PSR-4 autoloader (composer)
+$composerAutoload = $rootDir . '/vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require $composerAutoload;
+} else {
+    // Manual PSR-4 fallback (zero-dependency distribution)
+    spl_autoload_register(function (string $class) use ($rootDir): void {
+        $prefix = 'LaravelAnalyzer\\';
+        if (!str_starts_with($class, $prefix)) return;
+
+        $relative = str_replace('\\', '/', substr($class, strlen($prefix)));
+        $file     = $rootDir . '/src/' . $relative . '.php';
+
+        if (file_exists($file)) {
+            require $file;
+        }
+    });
+}
+
+// ─────────────────────────────────────────
+// RESOLVE PROJECT PATH
+// ─────────────────────────────────────────
+
+$projectPath = getcwd();
+
+foreach (array_slice($argv, 1) as $arg) {
+    // Skip flags
+    if (str_starts_with($arg, '--')) continue;
+
+    $resolved = realpath($arg);
+    if ($resolved !== false && is_dir($resolved)) {
+        $projectPath = $resolved;
+        break;
+    }
+}
+
+// ─────────────────────────────────────────
+// START MCP SERVER
+// ─────────────────────────────────────────
+
+$server = new LaravelAnalyzer\Mcp\Server($projectPath);
+$server->run();

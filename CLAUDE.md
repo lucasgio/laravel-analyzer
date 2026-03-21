@@ -50,6 +50,48 @@ There are no build, compile, or test steps — this is a distribution-ready tool
 
 **Reports** (`src/Reports/ReportGenerator.php`): Generates console (ANSI), JSON, HTML, and Markdown from the same result set.
 
+**MCP Server** (`src/Mcp/`): JSON-RPC 2.0 server over stdio. Compatible with Claude Code, Cursor, Windsurf, Gemini CLI, VS Code Copilot.
+
+| Class | Role |
+|---|---|
+| `Server` | JSON-RPC 2.0 loop (STDIN/STDOUT/STDERR) |
+| `ToolHandler` | 4 callable tools wrapping the analyzers |
+| `ResourceHandler` | Readable documentation URIs (`laravel-analyzer://docs/*`) |
+| `PromptHandler` | Prompt templates surfaced as slash commands |
+
+## MCP Server
+
+```bash
+# Start the MCP server (project path defaults to cwd)
+php bin/laravel-analyze-mcp /path/to/laravel-project
+```
+
+### MCP Tools
+| Tool | Description |
+|---|---|
+| `analyze` | Full analysis, all or selected modules |
+| `analyze_module` | Single module deep-dive |
+| `get_issues` | Filtered issues by severity/module |
+| `get_recommendations` | Prioritized recommendations |
+
+### MCP Configuration
+- Claude Code / Windsurf: `.mcp.json` in project root
+- Cursor: `.cursor/mcp.json`
+
+### Claude Code Slash Commands (Skills)
+| Command | Description |
+|---|---|
+| `/analyze` | Full project analysis summary |
+| `/security-audit` | Security + OWASP audit with remediation plan |
+| `/pre-commit` | Quality gate check before committing |
+
+### MCP Prompt Slash Commands (via MCP)
+| Prompt | Claude Code command |
+|---|---|
+| `security-audit` | `/mcp__laravel-analyzer__security-audit` |
+| `pre-commit-check` | `/mcp__laravel-analyzer__pre-commit-check` |
+| `full-review` | `/mcp__laravel-analyzer__full-review` |
+
 ## Key Conventions
 
 - **Namespace**: `LaravelAnalyzer\` maps to `src/` via PSR-4
