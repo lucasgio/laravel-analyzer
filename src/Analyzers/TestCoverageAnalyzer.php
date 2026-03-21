@@ -117,7 +117,10 @@ class TestCoverageAnalyzer extends BaseAnalyzer
     private function parseCloverXml(string $path): array
     {
         try {
+            $useInternalErrors = libxml_use_internal_errors(true);
             $xml = simplexml_load_string($this->readFile($path));
+            libxml_clear_errors();
+            libxml_use_internal_errors($useInternalErrors);
             if (!$xml) return ['line_coverage' => 'Error parsing XML'];
 
             $metrics = $xml->project->metrics ?? null;

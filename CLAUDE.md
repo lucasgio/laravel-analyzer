@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`laravel-analyzer` is a standalone PHP CLI tool that performs static analysis on Laravel applications. It requires **zero external dependencies** — pure PHP 8.1+ only. The tool analyzes code quality, security, and maintainability across 6 independent modules.
+`laravel-analyzer` is a standalone PHP CLI tool that performs static analysis on Laravel applications. It requires **zero external dependencies** — pure PHP 8.2+ only. The tool analyzes code quality, security, and maintainability across 6 independent modules.
 
 ## Running the Tool
 
