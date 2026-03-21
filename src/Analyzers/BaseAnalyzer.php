@@ -4,25 +4,38 @@ declare(strict_types=1);
 
 namespace LaravelAnalyzer\Analyzers;
 
+use LaravelAnalyzer\Config\LaravelFileFilter;
+
 abstract class BaseAnalyzer
 {
     protected array $issues = [];
     protected array $recommendations = [];
     protected string $projectPath = '';
 
+    /** Per-file issue map: [ 'relative/path.php' => [ issue, … ] ] */
+    protected array $fileIssues = [];
+
     abstract public function analyze(string $projectPath): array;
 
-    protected function getPhpFiles(string $path, array $excludeDirs = ['vendor', 'node_modules', '.git', 'storage', 'bootstrap/cache']): array
+    /**
+     * Returns PHP files, excluding framework dirs.
+     * When $devOnly is true the LaravelFileFilter is applied so that
+     * Laravel scaffold files are excluded from the results.
+     */
+    protected function getPhpFiles(string $path, array $excludeDirs = [], bool $devOnly = false): array
     {
         $files = [];
         if (!is_dir($path)) return $files;
 
+        $defaultExclude = LaravelFileFilter::excludedDirs();
+        $allExclude     = array_unique(array_merge($defaultExclude, $excludeDirs));
+
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveCallbackFilterIterator(
                 new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
-                function ($current) use ($excludeDirs) {
+                function ($current) use ($allExclude) {
                     if ($current->isDir()) {
-                        foreach ($excludeDirs as $excluded) {
+                        foreach ($allExclude as $excluded) {
                             if (str_contains($current->getPathname(), DIRECTORY_SEPARATOR . $excluded)) {
                                 return false;
                             }
@@ -39,7 +52,21 @@ abstract class BaseAnalyzer
             }
         }
 
+        if ($devOnly && $this->projectPath !== '') {
+            $filter = new LaravelFileFilter($this->projectPath);
+            $files  = $filter->filterDevFiles($files);
+        }
+
         return $files;
+    }
+
+    /**
+     * Same as getPhpFiles() with devOnly=true — convenience method for analyzers
+     * that should only inspect developer-written code.
+     */
+    protected function getDevPhpFiles(string $path): array
+    {
+        return $this->getPhpFiles($path, [], true);
     }
 
     protected function getFilesByPattern(string $path, string $pattern): array
@@ -99,12 +126,26 @@ abstract class BaseAnalyzer
 
     protected function addIssue(string $severity, string $file, string $message, int $line = 0): void
     {
-        $this->issues[] = [
+        $entry = [
             'severity' => $severity,
             'file'     => $file,
             'line'     => $line,
             'message'  => $message,
         ];
+
+        $this->issues[] = $entry;
+
+        // Also index by file for the per-file report
+        $relativeFile = $this->toRelativePath($file);
+        $this->fileIssues[$relativeFile][] = $entry;
+    }
+
+    private function toRelativePath(string $file): string
+    {
+        if ($this->projectPath !== '' && str_starts_with($file, $this->projectPath . '/')) {
+            return substr($file, strlen($this->projectPath) + 1);
+        }
+        return $file;
     }
 
     protected function addRecommendation(string $message): void
@@ -120,6 +161,7 @@ abstract class BaseAnalyzer
             'summary'         => $summary,
             'metrics'         => $metrics,
             'issues'          => $this->issues,
+            'file_issues'     => $this->fileIssues,
             'recommendations' => $this->recommendations,
         ];
     }

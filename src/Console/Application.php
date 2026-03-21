@@ -10,6 +10,7 @@ use LaravelAnalyzer\Analyzers\TechnicalDebtAnalyzer;
 use LaravelAnalyzer\Analyzers\ComplexityAnalyzer;
 use LaravelAnalyzer\Analyzers\SecurityAnalyzer;
 use LaravelAnalyzer\Analyzers\OwaspAnalyzer;
+use LaravelAnalyzer\Analyzers\RefactoringAnalyzer;
 use LaravelAnalyzer\Reports\ReportGenerator;
 
 class Application
@@ -153,6 +154,7 @@ class Application
             'complexity'  => ['name' => 'Refactoring Complexity',      'instance' => new ComplexityAnalyzer()],
             'security'    => ['name' => 'Laravel Security Risk',       'instance' => new SecurityAnalyzer()],
             'owasp'       => ['name' => 'OWASP Top 10',                'instance' => new OwaspAnalyzer()],
+            'refactoring' => ['name' => 'Refactoring Opportunities',   'instance' => new RefactoringAnalyzer()],
         ];
     }
 
