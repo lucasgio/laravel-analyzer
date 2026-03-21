@@ -1,0 +1,18 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Composer
+vendor/
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+
+# Generated reports (examples kept, but ignore local outputs)
+*.local.json
+*.local.html
+*.local.md

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laravel Analyzer Report — mock-laravel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+  .header { background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 1px solid #334155; }
+  .header h1 { font-size: 1.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 0.5rem; }
+  .header .meta { color: #94a3b8; font-size: 0.9rem; }
+  .global-score { font-size: 4rem; font-weight: 900; color: #f59e0b; }
+  .grade-badge { display: inline-block; background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b; border-radius: 8px; padding: 0.2rem 0.8rem; font-size: 1.2rem; font-weight: 700; margin-left: 1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; transition: border-color 0.2s; }
+  .card:hover { border-color: #38bdf8; }
+  .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .score-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .score-num { font-size: 2rem; font-weight: 700; }
+  .risk-badge { padding: 0.2rem 0.7rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+  .risk-BAJO { background: #166534; color: #bbf7d0; }
+  .risk-MEDIO { background: #713f12; color: #fde68a; }
+  .risk-ALTO { background: #7c2d12; color: #fed7aa; }
+  .risk-CRÍTICO { background: #450a0a; color: #fecaca; }
+  .progress-bar { width: 100%; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .metrics { font-size: 0.82rem; color: #94a3b8; margin: 0.5rem 0; }
+  .metric-row { display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid #1e293b; }
+  .issue { padding: 0.5rem 0.75rem; border-radius: 6px; margin: 0.25rem 0; font-size: 0.82rem; }
+  .issue-CRITICAL { background: #450a0a; border-left: 3px solid #ef4444; }
+  .issue-HIGH { background: #431407; border-left: 3px solid #f97316; }
+  .issue-MEDIUM { background: #422006; border-left: 3px solid #f59e0b; }
+  .issue-file { color: #94a3b8; font-family: monospace; font-size: 0.78rem; }
+  .rec { padding: 0.4rem 0.75rem; background: #0c2840; border-left: 3px solid #38bdf8; border-radius: 0 6px 6px 0; margin: 0.3rem 0; font-size: 0.82rem; color: #bae6fd; }
+  .owasp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .owasp-table th { background: #0f172a; padding: 0.5rem; text-align: left; color: #94a3b8; }
+  .owasp-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #1e293b; }
+  .section-title { font-size: 1.3rem; font-weight: 700; color: #38bdf8; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #334155; }
+  footer { text-align: center; color: #475569; font-size: 0.8rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔍 Laravel Best Practices Analyzer</h1>
+    <div class="meta">Proyecto: <strong>mock-laravel</strong> · Generado: 2026-03-21 15:02:37</div>
+    <div style="margin-top:1rem;">
+      <span class="global-score">64.6</span><span style="font-size:2rem;color:#64748b">/100</span>
+      <span class="grade-badge">C</span>
+    </div>
+  </div>
+
+  <div class="section-title">📊 Análisis por Módulo</div>
+  <div class="grid">
+    <div class="card">
+  <div class="card-title">🔗 Acoplamiento & Cohesión</div>
+  <div class="score-row">
+    <span class="score-num" style="color:#ef4444">45</span>
+    <span style="color:#64748b">/100</span>
+    <span class="risk-badge risk-ALTO">ALTO</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:45%;background:#ef4444"></div></div>
+  <div style="font-size:0.82rem;color:#94a3b8;margin:0.5rem 0">Acoplamiento promedio: 5.5 deps. God classes: 0. Métodos largos: 0.</div>
+  <div class='metric-row'><span>Total Classes</span><span><strong>4</strong></span></div><div class='metric-row'><span>Avg Coupling</span><span><strong>5.5</strong></span></div><div class='metric-row'><span>Avg Cohesion Score</span><span><strong>40</strong></span></div><div class='metric-row'><span>God Classes</span><span><strong>0</strong></span></div><div class='metric-row'><span>God Class Rate</span><span><strong>0%</strong></span></div><div class='metric-row'><span>High Coupling Classes</span><span><strong>1</strong></span></div><div class='metric-row'><span>Long Methods</span><span><strong>0</strong></span></div><div class='metric-row'><span>Total Methods</span><span><strong>16</strong></span></div>
+  <div class='issue issue-HIGH'><div class='issue-file'>app/Services/PaymentService.php</div>Clase &#039;PaymentService&#039; tiene alto acoplamiento (15 dependencias). Considera usar interfaces o el patrón Facade.</div>
+  
+  <div class='rec'>Aplica el principio SOLID en todas las clases. Usa &#039;php artisan make:interface&#039; para definir contratos.</div><div class='rec'>Revisa el uso excesivo de Facades: pueden ocultar dependencias reales. Inyéctalas explícitamente.</div>
+</div><div class="card">
+  <div class="card-title">🧪 Cobertura de Tests</div>
+  <div class="score-row">
+    <span class="score-num" style="color:#ef4444">32.2</span>
+    <span style="color:#64748b">/100</span>
+    <span class="risk-badge risk-CRÍTICO">CRÍTICO</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:32.2%;background:#ef4444"></div></div>
+  <div style="font-size:0.82rem;color:#94a3b8;margin:0.5rem 0">Tests: 1 archivos. Unit: 1 | Feature: 0. Cobertura: N/A.</div>
+  <div class='metric-row'><span>Test Framework</span><span><strong>PHPUnit</strong></span></div><div class='metric-row'><span>Has Test Config</span><span><strong>1</strong></span></div><div class='metric-row'><span>Source Files</span><span><strong>3</strong></span></div><div class='metric-row'><span>Test Files</span><span><strong>1</strong></span></div><div class='metric-row'><span>Test Ratio</span><span><strong>33.3%</strong></span></div><div class='metric-row'><span>Unit Tests</span><span><strong>1</strong></span></div><div class='metric-row'><span>Feature Tests</span><span><strong>0</strong></span></div><div class='metric-row'><span>Coverage Xml Found</span><span><strong></strong></span></div><div class='metric-row'><span>Line Coverage</span><span><strong>No disponible (ejecuta phpunit --coverage-clover)</strong></span></div><div class='metric-row'><span>Test Quality Score</span><span><strong>50</strong></span></div><div class='metric-row'><span>Has Factories</span><span><strong></strong></span></div><div class='metric-row'><span>Factory Count</span><span><strong>0</strong></span></div>
+  <div class='issue issue-HIGH'><div class='issue-file'>app/Http/Controllers</div>Controladores HTTP: Solo 0% de cobertura (0/1 archivos referenciados en tests).</div><div class='issue issue-HIGH'><div class='issue-file'>app/Services</div>Servicios de negocio: Solo 0% de cobertura (0/1 archivos referenciados en tests).</div>
+  
+  <div class='rec'>Agrega tests de feature para tus endpoints HTTP. Usa &#039;php artisan make:test NombreTest&#039;.</div><div class='rec'>Crea Model Factories para generar datos de prueba: &#039;php artisan make:factory ModeloFactory&#039;.</div>
+</div><div class="card">
+  <div class="card-title">💸 Deuda Técnica</div>
+  <div class="score-row">
+    <span class="score-num" style="color:#f59e0b">75</span>
+    <span style="color:#64748b">/100</span>
+    <span class="risk-badge risk-MEDIO">MEDIO</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:75%;background:#f59e0b"></div></div>
+  <div style="font-size:0.82rem;color:#94a3b8;margin:0.5rem 0">Deuda técnica detectada: 25 puntos de deuda. TODO/FIXME: 10. Anti-patterns: 2.</div>
+  <div class='metric-row'><span>Total Debt Markers</span><span><strong>10</strong></span></div><div class='metric-row'><span>Anti Patterns Found</span><span><strong>2</strong></span></div><div class='metric-row'><span>Commented Code Blocks</span><span><strong>0</strong></span></div><div class='metric-row'><span>Debt Score Points</span><span><strong>25</strong></span></div>
+  <div class='issue issue-CRITICAL'><div class='issue-file'>.env</div>APP_DEBUG=true con APP_ENV=production expone stacktraces y variables de entorno. ¡Deshabilítalo inmediatamente!</div>
+  
+  <div class='rec'>Configura una herramienta de análisis estático: &#039;composer require nunomaduro/larastan --dev&#039; (PHPStan para Laravel).</div><div class='rec'>Usa PHP CS Fixer o Pint (incluido en Laravel 9+) para mantener el estilo de código consistente: &#039;php artisan pint&#039;.</div>
+</div><div class="card">
+  <div class="card-title">🧮 Complejidad</div>
+  <div class="score-row">
+    <span class="score-num" style="color:#22c55e">91.9</span>
+    <span style="color:#64748b">/100</span>
+    <span class="risk-badge risk-BAJO">BAJO</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:91.9%;background:#22c55e"></div></div>
+  <div style="font-size:0.82rem;color:#94a3b8;margin:0.5rem 0">CC promedio: 2.25. Métodos de alta complejidad: 1.. Anidamiento profundo: 1 clases. Duplicación: 4 bloques.</div>
+  <div class='metric-row'><span>Total Methods</span><span><strong>16</strong></span></div><div class='metric-row'><span>Avg Cyclomatic Complexity</span><span><strong>2.25</strong></span></div><div class='metric-row'><span>High Complexity Methods</span><span><strong>1</strong></span></div><div class='metric-row'><span>Max Complexity</span><span><strong>16</strong></span></div><div class='metric-row'><span>Deep Nesting Classes</span><span><strong>1</strong></span></div><div class='metric-row'><span>Long Classes</span><span><strong>0</strong></span></div><div class='metric-row'><span>Duplicate Blocks</span><span><strong>4</strong></span></div>
+  <div class='issue issue-HIGH'><div class='issue-file'>app/Http/Controllers/UserController.php</div>Alta Complejidad Ciclomática: UserController::complexReport() = 16. Recomendado máximo: 10.</div>
+  
+  <div class='rec'>El método más complejo es &#039;UserController::complexReport&#039; (CC=16). Prioriza refactorizarlo: extrae métodos, usa Strategy pattern o simplifica condicionales.</div><div class='rec'>Reduce el anidamiento profundo usando &#039;Return Early&#039; (guard clauses): retorna o lanza excepciones pronto en lugar de anidar if/else.</div>
+</div><div class="card">
+  <div class="card-title">🔒 Seguridad Laravel</div>
+  <div class="score-row">
+    <span class="score-num" style="color:#ef4444">0</span>
+    <span style="color:#64748b">/100</span>
+    <span class="risk-badge risk-CRÍTICO">CRÍTICO</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:0%;background:#ef4444"></div></div>
+  <div style="font-size:0.82rem;color:#94a3b8;margin:0.5rem 0">Vulnerabilidades: 3 críticas, 6 altas, 8 medias. Total: 17 problemas.</div>
+  <div class='metric-row'><span>Total Vulnerabilities</span><span><strong>17</strong></span></div><div class='metric-row'><span>Critical</span><span><strong>3</strong></span></div><div class='metric-row'><span>High</span><span><strong>6</strong></span></div><div class='metric-row'><span>Medium</span><span><strong>8</strong></span></div>
+  <div class='issue issue-CRITICAL'><div class='issue-file'>app/Http/Controllers/UserController.php:25</div>[A01:2021] Mass Assignment: Model::create(\$request-&gt;all()): Model::create(\$request-&gt;all()) es peligroso. Usa \$request-&gt;validated() o \$request-&gt;only([...]).</div><div class='issue issue-HIGH'><div class='issue-file'>app/Http/Controllers/UserController.php:34</div>[A05:2021] dd() en código de producción: dd() expone información interna. Elimínalo antes de hacer deploy.</div><div class='issue issue-CRITICAL'><div class='issue-file'>app/Http/Controllers/UserController.php:42</div>[A03:2021] Command Injection: ejecución de comandos con variable: Ejecución de comandos del sistema con datos potencialmente no sanitizados. Extremadamente peligroso.</div>
+  
+  <div class='rec'>Mass Assignment: Define $fillable explícitamente en cada modelo. Usa $request-&gt;validated() en lugar de $request-&gt;all().</div><div class='rec'>Criptografía: Usa Hash::make() (bcrypt por defecto) para contraseñas. Nunca MD5 o SHA1. Para tokens, usa Str::random() o bin2hex(random_bytes(32)).</div>
+</div><div class="card">
+  <div class="card-title">🛡️  OWASP Top 10</div>
+  <div class="score-row">
+    <span class="score-num" style="color:#f59e0b">78.7</span>
+    <span style="color:#64748b">/100</span>
+    <span class="risk-badge risk-MEDIO">MEDIO</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:78.7%;background:#f59e0b"></div></div>
+  <div style="font-size:0.82rem;color:#94a3b8;margin:0.5rem 0">OWASP Score: 78.7/100. Categorías críticas: 0/10. Total hallazgos: 14.</div>
+  <div class='metric-row'><span>Total Findings</span><span><strong>14</strong></span></div><div class='metric-row'><span>Critical Owasp Items</span><span><strong>0</strong></span></div><div class='metric-row'><span>Passed Checks</span><span><strong>5</strong></span></div>
+  <div class='issue issue-HIGH'><div class='issue-file'>app/Policies</div>[A01] Sin Policies de autorización. Implementa Gates y Policies para control de acceso granular.</div><div class='issue issue-HIGH'><div class='issue-file'>app/Http/Controllers/UserController.php</div>[A01] Posible IDOR: Model::find($id) sin verificación de ownership. Verifica que el usuario tiene acceso al recurso: Route Model Binding con Policy.</div><div class='issue issue-CRITICAL'><div class='issue-file'>app/Http/Controllers/UserController.php</div>[A02] MD5 para datos sensibles. Usa Hash::make() (bcrypt/argon2) para contraseñas.</div>
+  <table class='owasp-table'><tr><th>Código</th><th>Categoría</th><th>Score</th><th>Riesgo</th></tr><tr><td>A01</td><td>Broken Access Control</td><td style='color:#ef4444;font-weight:600'>55</td><td><span class='risk-badge risk-ALTO'>ALTO</span></td></tr><tr><td>A02</td><td>Cryptographic Failures</td><td style='color:#22c55e;font-weight:600'>88</td><td><span class='risk-badge risk-BAJO'>BAJO</span></td></tr><tr><td>A03</td><td>Injection</td><td style='color:#f59e0b;font-weight:600'>60</td><td><span class='risk-badge risk-MEDIO'>MEDIO</span></td></tr><tr><td>A04</td><td>Insecure Design</td><td style='color:#22c55e;font-weight:600'>90</td><td><span class='risk-badge risk-BAJO'>BAJO</span></td></tr><tr><td>A05</td><td>Security Misconfiguration</td><td style='color:#f59e0b;font-weight:600'>64</td><td><span class='risk-badge risk-MEDIO'>MEDIO</span></td></tr><tr><td>A06</td><td>Vulnerable & Outdated Components</td><td style='color:#22c55e;font-weight:600'>100</td><td><span class='risk-badge risk-BAJO'>BAJO</span></td></tr><tr><td>A07</td><td>Identification & Authentication Failures</td><td style='color:#22c55e;font-weight:600'>100</td><td><span class='risk-badge risk-BAJO'>BAJO</span></td></tr><tr><td>A08</td><td>Software & Data Integrity Failures</td><td style='color:#f59e0b;font-weight:600'>60</td><td><span class='risk-badge risk-MEDIO'>MEDIO</span></td></tr><tr><td>A09</td><td>Security Logging & Monitoring Failures</td><td style='color:#f59e0b;font-weight:600'>70</td><td><span class='risk-badge risk-MEDIO'>MEDIO</span></td></tr><tr><td>A10</td><td>Server-Side Request Forgery (SSRF)</td><td style='color:#22c55e;font-weight:600'>100</td><td><span class='risk-badge risk-BAJO'>BAJO</span></td></tr></table>
+  <div class='rec'>Ejecuta &#039;composer audit&#039; regularmente para detectar CVEs en dependencias. Integra en CI/CD.</div>
+</div>
+  </div>
+
+  <footer>Generado por Laravel Best Practices Analyzer v1.0.0 · 2026-03-21 15:02:37</footer>
+</div>
+</body>
+</html>

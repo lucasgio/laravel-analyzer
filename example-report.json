@@ -1,0 +1,689 @@
+{
+    "generated_at": "2026-03-21 15:02:29",
+    "project": "mock-laravel",
+    "project_path": "/tmp/mock-laravel",
+    "global_score": 64.6,
+    "grade": "C",
+    "analyses": {
+        "coupling": {
+            "score": 45,
+            "risk": "ALTO",
+            "summary": "Acoplamiento promedio: 5.5 deps. God classes: 0. Métodos largos: 0.",
+            "metrics": {
+                "total_classes": 4,
+                "avg_coupling": 5.5,
+                "avg_cohesion_score": 40,
+                "god_classes": 0,
+                "god_class_rate": "0%",
+                "high_coupling_classes": 1,
+                "long_methods": 0,
+                "total_methods": 16,
+                "worst_offenders": [
+                    {
+                        "class": "PaymentService",
+                        "file": "app/Services/PaymentService.php",
+                        "coupling": 15,
+                        "methods": 4,
+                        "lines": 59,
+                        "cohesion": 50
+                    },
+                    {
+                        "class": "UserController",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "coupling": 5,
+                        "methods": 7,
+                        "lines": 91,
+                        "cohesion": 50
+                    },
+                    {
+                        "class": "User",
+                        "file": "app/Models/User.php",
+                        "coupling": 1,
+                        "methods": 4,
+                        "lines": 23,
+                        "cohesion": 20
+                    },
+                    {
+                        "class": "AppServiceProvider",
+                        "file": "app/Providers/AppServiceProvider.php",
+                        "coupling": 1,
+                        "methods": 1,
+                        "lines": 12,
+                        "cohesion": 40
+                    }
+                ]
+            },
+            "issues": [
+                {
+                    "severity": "HIGH",
+                    "file": "app/Services/PaymentService.php",
+                    "line": 0,
+                    "message": "Clase 'PaymentService' tiene alto acoplamiento (15 dependencias). Considera usar interfaces o el patrón Facade."
+                }
+            ],
+            "recommendations": [
+                "Aplica el principio SOLID en todas las clases. Usa 'php artisan make:interface' para definir contratos.",
+                "Revisa el uso excesivo de Facades: pueden ocultar dependencias reales. Inyéctalas explícitamente."
+            ]
+        },
+        "testing": {
+            "score": 32.17,
+            "risk": "CRÍTICO",
+            "summary": "Tests: 1 archivos. Unit: 1 | Feature: 0. Cobertura: N/A.",
+            "metrics": {
+                "test_framework": "PHPUnit",
+                "has_test_config": true,
+                "source_files": 3,
+                "test_files": 1,
+                "test_ratio": "33.3%",
+                "unit_tests": 1,
+                "feature_tests": 0,
+                "coverage_xml_found": false,
+                "line_coverage": "No disponible (ejecuta phpunit --coverage-clover)",
+                "test_quality_score": 50,
+                "untested_areas": [
+                    {
+                        "area": "Controladores HTTP",
+                        "path": "app/Http/Controllers",
+                        "files": 1,
+                        "tested": 0,
+                        "coverage": "0%"
+                    },
+                    {
+                        "area": "Servicios de negocio",
+                        "path": "app/Services",
+                        "files": 1,
+                        "tested": 0,
+                        "coverage": "0%"
+                    }
+                ],
+                "has_factories": false,
+                "factory_count": 0
+            },
+            "issues": [
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers",
+                    "line": 0,
+                    "message": "Controladores HTTP: Solo 0% de cobertura (0/1 archivos referenciados en tests)."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Services",
+                    "line": 0,
+                    "message": "Servicios de negocio: Solo 0% de cobertura (0/1 archivos referenciados en tests)."
+                }
+            ],
+            "recommendations": [
+                "Agrega tests de feature para tus endpoints HTTP. Usa 'php artisan make:test NombreTest'.",
+                "Crea Model Factories para generar datos de prueba: 'php artisan make:factory ModeloFactory'.",
+                "Genera el reporte de cobertura: 'php artisan test --coverage-clover=coverage.xml'. Apunta a mínimo 70%.",
+                "Usa RefreshDatabase en tests de feature para aislar el estado de la base de datos.",
+                "Implementa CI/CD que ejecute los tests automáticamente en cada push (GitHub Actions, GitLab CI)."
+            ]
+        },
+        "debt": {
+            "score": 75,
+            "risk": "MEDIO",
+            "summary": "Deuda técnica detectada: 25 puntos de deuda. TODO/FIXME: 10. Anti-patterns: 2.",
+            "metrics": {
+                "debt_indicators": {
+                    "TODO": 6,
+                    "FIXME": 2,
+                    "HACK": 2
+                },
+                "total_debt_markers": 10,
+                "anti_patterns_found": 2,
+                "commented_code_blocks": 0,
+                "composer_issues": [],
+                "env_issues": [
+                    "APP_DEBUG=true en entorno de producción. ¡Riesgo de seguridad crítico!"
+                ],
+                "migration_issues": [
+                    "Migración sin método down(): 2024_01_01_create_users_table.php"
+                ],
+                "debt_score_points": 25,
+                "worst_antipatterns": [
+                    {
+                        "file": "database/migrations/2024_01_01_create_users_table.php",
+                        "issue": "Uso de echo/print en lugar de return o Blade. Puede causar problemas de testing.",
+                        "count": 1
+                    },
+                    {
+                        "file": "routes/web.php",
+                        "issue": "Closure en Route en lugar de Controller. Dificulta el testing y la reutilización.",
+                        "count": 3
+                    }
+                ]
+            },
+            "issues": [
+                {
+                    "severity": "LOW",
+                    "file": "database/migrations/2024_01_01_create_users_table.php",
+                    "line": 0,
+                    "message": "Uso de echo/print en lugar de return o Blade. Puede causar problemas de testing."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/web.php",
+                    "line": 0,
+                    "message": "Closure en Route en lugar de Controller. Dificulta el testing y la reutilización."
+                },
+                {
+                    "severity": "LOW",
+                    "file": "app/Services/PaymentService.php",
+                    "line": 0,
+                    "message": "5x TODO pendiente encontrado en este archivo."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": ".env",
+                    "line": 0,
+                    "message": "APP_DEBUG=true con APP_ENV=production expone stacktraces y variables de entorno. ¡Deshabilítalo inmediatamente!"
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "database/migrations/2024_01_01_create_users_table.php",
+                    "line": 0,
+                    "message": "Migración sin método down(). Esto impide hacer rollback de cambios."
+                }
+            ],
+            "recommendations": [
+                "Configura una herramienta de análisis estático: 'composer require nunomaduro/larastan --dev' (PHPStan para Laravel).",
+                "Usa PHP CS Fixer o Pint (incluido en Laravel 9+) para mantener el estilo de código consistente: 'php artisan pint'.",
+                "Implementa revisiones de código (code reviews) antes de cada merge para detectar deuda técnica temprano."
+            ]
+        },
+        "complexity": {
+            "score": 91.88,
+            "risk": "BAJO",
+            "summary": "CC promedio: 2.25. Métodos de alta complejidad: 1.. Anidamiento profundo: 1 clases. Duplicación: 4 bloques.",
+            "metrics": {
+                "total_methods": 16,
+                "avg_cyclomatic_complexity": 2.25,
+                "high_complexity_methods": 1,
+                "max_complexity": 16,
+                "deep_nesting_classes": 1,
+                "long_classes": 0,
+                "duplicate_blocks": 4,
+                "complexity_distribution": {
+                    "low": 14,
+                    "medium": 1,
+                    "high": 1,
+                    "critical": 0
+                },
+                "most_complex_methods": [
+                    {
+                        "class": "UserController",
+                        "method": "complexReport",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "complexity": 16
+                    },
+                    {
+                        "class": "PaymentService",
+                        "method": "processPayment",
+                        "file": "app/Services/PaymentService.php",
+                        "complexity": 6
+                    },
+                    {
+                        "class": "UserController",
+                        "method": "index",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "complexity": 1
+                    },
+                    {
+                        "class": "UserController",
+                        "method": "show",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "complexity": 1
+                    },
+                    {
+                        "class": "UserController",
+                        "method": "store",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "complexity": 1
+                    }
+                ]
+            },
+            "issues": [
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "Alta Complejidad Ciclomática: UserController::complexReport() = 16. Recomendado máximo: 10."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "Anidamiento profundo detectado en 'UserController' (profundidad: 9). Considera extraer métodos o usar cláusulas de guarda (return early)."
+                }
+            ],
+            "recommendations": [
+                "El método más complejo es 'UserController::complexReport' (CC=16). Prioriza refactorizarlo: extrae métodos, usa Strategy pattern o simplifica condicionales.",
+                "Reduce el anidamiento profundo usando 'Return Early' (guard clauses): retorna o lanza excepciones pronto en lugar de anidar if/else.",
+                "Instala PHPStan con Larastan para detección automática de complejidad: 'composer require --dev nunomaduro/larastan'.",
+                "Configura un límite de complejidad en CI/CD. PHPStan y PHPMD pueden rechazar código con CC > 10 automáticamente."
+            ]
+        },
+        "security": {
+            "score": 0,
+            "risk": "CRÍTICO",
+            "summary": "Vulnerabilidades: 3 críticas, 6 altas, 8 medias. Total: 17 problemas.",
+            "metrics": {
+                "total_vulnerabilities": 17,
+                "critical": 3,
+                "high": 6,
+                "medium": 8,
+                "by_category": {
+                    "auth": 6,
+                    "mass_assignment": 2,
+                    "data_exposure": 3,
+                    "command_injection": 1,
+                    "crypto": 4,
+                    "redirect": 1
+                },
+                "config_issues": [
+                    {
+                        "severity": "CRITICAL",
+                        "msg": "APP_DEBUG=true en producción expone stacktraces y variables de entorno."
+                    },
+                    {
+                        "severity": "MEDIUM",
+                        "msg": "SESSION_SECURE_COOKIE no está en true. Las cookies de sesión deberían ser HTTPS-only."
+                    },
+                    {
+                        "severity": "HIGH",
+                        "msg": "CORS configurado con wildcard ('*'). Limita los orígenes permitidos."
+                    },
+                    {
+                        "severity": "MEDIUM",
+                        "msg": "Sin paquete de autenticación API (Sanctum/Passport). Si tienes API, implementa autenticación."
+                    }
+                ],
+                "top_vulnerabilities": [
+                    {
+                        "category": "mass_assignment",
+                        "label": "Mass Assignment: Model::create(\\$request->all())",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "line": 25,
+                        "severity": "CRITICAL",
+                        "desc": "Model::create(\\$request->all()) es peligroso. Usa \\$request->validated() o \\$request->only([...]).",
+                        "owasp": "A01:2021"
+                    },
+                    {
+                        "category": "data_exposure",
+                        "label": "dd() en código de producción",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "line": 34,
+                        "severity": "HIGH",
+                        "desc": "dd() expone información interna. Elimínalo antes de hacer deploy.",
+                        "owasp": "A05:2021"
+                    },
+                    {
+                        "category": "command_injection",
+                        "label": "Command Injection: ejecución de comandos con variable",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "line": 42,
+                        "severity": "CRITICAL",
+                        "desc": "Ejecución de comandos del sistema con datos potencialmente no sanitizados. Extremadamente peligroso.",
+                        "owasp": "A03:2021"
+                    },
+                    {
+                        "category": "crypto",
+                        "label": "Uso de MD5 (hash débil)",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "line": 49,
+                        "severity": "HIGH",
+                        "desc": "MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make().",
+                        "owasp": "A02:2021"
+                    },
+                    {
+                        "category": "redirect",
+                        "label": "Open Redirect",
+                        "file": "app/Http/Controllers/UserController.php",
+                        "line": 44,
+                        "severity": "HIGH",
+                        "desc": "Redirect con URL del usuario puede llevar a Open Redirect. Valida que la URL sea interna.",
+                        "owasp": "A01:2021"
+                    },
+                    {
+                        "category": "crypto",
+                        "label": "Uso de MD5 (hash débil)",
+                        "file": "app/Services/PaymentService.php",
+                        "line": 43,
+                        "severity": "HIGH",
+                        "desc": "MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make().",
+                        "owasp": "A02:2021"
+                    },
+                    {
+                        "category": "crypto",
+                        "label": "Uso de SHA1 (hash débil)",
+                        "file": "app/Services/PaymentService.php",
+                        "line": 41,
+                        "severity": "HIGH",
+                        "desc": "SHA1 es inseguro para datos sensibles. Usa Hash::make() con bcrypt para contraseñas.",
+                        "owasp": "A02:2021"
+                    },
+                    {
+                        "category": "mass_assignment",
+                        "label": "Mass Assignment: \\$guarded vacío",
+                        "file": "app/Models/User.php",
+                        "line": 9,
+                        "severity": "CRITICAL",
+                        "desc": "\\$guarded = [] desactiva todas las protecciones de mass assignment. Muy peligroso.",
+                        "owasp": "A01:2021"
+                    },
+                    {
+                        "category": "crypto",
+                        "label": "Uso de MD5 (hash débil)",
+                        "file": "app/Models/User.php",
+                        "line": 20,
+                        "severity": "HIGH",
+                        "desc": "MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make().",
+                        "owasp": "A02:2021"
+                    }
+                ]
+            },
+            "issues": [
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/web.php:16",
+                    "line": 0,
+                    "message": "[A01:2021] Ruta sin middleware de autenticación: Verifica que las rutas sensibles tengan ->middleware(\"auth\") o estén dentro de grupos protegidos."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/web.php:17",
+                    "line": 0,
+                    "message": "[A01:2021] Ruta sin middleware de autenticación: Verifica que las rutas sensibles tengan ->middleware(\"auth\") o estén dentro de grupos protegidos."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/web.php:18",
+                    "line": 0,
+                    "message": "[A01:2021] Ruta sin middleware de autenticación: Verifica que las rutas sensibles tengan ->middleware(\"auth\") o estén dentro de grupos protegidos."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/api.php:6",
+                    "line": 0,
+                    "message": "[A01:2021] Ruta sin middleware de autenticación: Verifica que las rutas sensibles tengan ->middleware(\"auth\") o estén dentro de grupos protegidos."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/api.php:7",
+                    "line": 0,
+                    "message": "[A01:2021] Ruta sin middleware de autenticación: Verifica que las rutas sensibles tengan ->middleware(\"auth\") o estén dentro de grupos protegidos."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "routes/api.php:8",
+                    "line": 0,
+                    "message": "[A01:2021] Ruta sin middleware de autenticación: Verifica que las rutas sensibles tengan ->middleware(\"auth\") o estén dentro de grupos protegidos."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": "app/Http/Controllers/UserController.php:25",
+                    "line": 0,
+                    "message": "[A01:2021] Mass Assignment: Model::create(\\$request->all()): Model::create(\\$request->all()) es peligroso. Usa \\$request->validated() o \\$request->only([...])."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers/UserController.php:34",
+                    "line": 0,
+                    "message": "[A05:2021] dd() en código de producción: dd() expone información interna. Elimínalo antes de hacer deploy."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": "app/Http/Controllers/UserController.php:42",
+                    "line": 0,
+                    "message": "[A03:2021] Command Injection: ejecución de comandos con variable: Ejecución de comandos del sistema con datos potencialmente no sanitizados. Extremadamente peligroso."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers/UserController.php:49",
+                    "line": 0,
+                    "message": "[A02:2021] Uso de MD5 (hash débil): MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make()."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers/UserController.php:44",
+                    "line": 0,
+                    "message": "[A01:2021] Open Redirect: Redirect con URL del usuario puede llevar a Open Redirect. Valida que la URL sea interna."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "app/Services/PaymentService.php:49",
+                    "line": 0,
+                    "message": "[A05:2021] var_dump() en código de producción: var_dump() puede exponer datos sensibles. Usa el logger de Laravel."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "app/Services/PaymentService.php:50",
+                    "line": 0,
+                    "message": "[A05:2021] print_r() en código de producción: print_r() puede exponer datos sensibles. Usa Log::debug() para debugging."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Services/PaymentService.php:43",
+                    "line": 0,
+                    "message": "[A02:2021] Uso de MD5 (hash débil): MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make()."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Services/PaymentService.php:41",
+                    "line": 0,
+                    "message": "[A02:2021] Uso de SHA1 (hash débil): SHA1 es inseguro para datos sensibles. Usa Hash::make() con bcrypt para contraseñas."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": "app/Models/User.php:9",
+                    "line": 0,
+                    "message": "[A01:2021] Mass Assignment: \\$guarded vacío: \\$guarded = [] desactiva todas las protecciones de mass assignment. Muy peligroso."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Models/User.php:20",
+                    "line": 0,
+                    "message": "[A02:2021] Uso de MD5 (hash débil): MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make()."
+                }
+            ],
+            "recommendations": [
+                "Mass Assignment: Define $fillable explícitamente en cada modelo. Usa $request->validated() en lugar de $request->all().",
+                "Criptografía: Usa Hash::make() (bcrypt por defecto) para contraseñas. Nunca MD5 o SHA1. Para tokens, usa Str::random() o bin2hex(random_bytes(32)).",
+                "Ejecuta 'php artisan audit' con laravel-security-checker: 'composer require enlightn/enlightn --dev && php artisan enlightn'.",
+                "Configura Content Security Policy headers usando spatie/laravel-csp: 'composer require spatie/laravel-csp'.",
+                "Revisa las recomendaciones de seguridad de Laravel: https://laravel.com/docs/security",
+                "Ejecuta 'composer audit' regularmente para detectar vulnerabilidades en dependencias."
+            ]
+        },
+        "owasp": {
+            "score": 78.7,
+            "risk": "MEDIO",
+            "summary": "OWASP Score: 78.7/100. Categorías críticas: 0/10. Total hallazgos: 14.",
+            "metrics": {
+                "owasp_breakdown": {
+                    "A01": {
+                        "code": "A01",
+                        "name": "Broken Access Control",
+                        "score": 55,
+                        "risk": "ALTO",
+                        "findings_count": 3,
+                        "description": "Control de acceso deficiente permite a usuarios realizar acciones no autorizadas."
+                    },
+                    "A02": {
+                        "code": "A02",
+                        "name": "Cryptographic Failures",
+                        "score": 88,
+                        "risk": "BAJO",
+                        "findings_count": 1,
+                        "description": "Exposición de datos sensibles por fallos criptográficos o datos en texto plano."
+                    },
+                    "A03": {
+                        "code": "A03",
+                        "name": "Injection",
+                        "score": 60,
+                        "risk": "MEDIO",
+                        "findings_count": 2,
+                        "description": "Datos del usuario enviados a intérpretes como SQL, OS, o LDAP sin sanitización."
+                    },
+                    "A04": {
+                        "code": "A04",
+                        "name": "Insecure Design",
+                        "score": 90,
+                        "risk": "BAJO",
+                        "findings_count": 1,
+                        "description": "Falta de controles de diseño seguro: rate limiting, validación, threat modeling."
+                    },
+                    "A05": {
+                        "code": "A05",
+                        "name": "Security Misconfiguration",
+                        "score": 64,
+                        "risk": "MEDIO",
+                        "findings_count": 3,
+                        "description": "Configuración de seguridad incorrecta en la aplicación, framework o servidor."
+                    },
+                    "A06": {
+                        "code": "A06",
+                        "name": "Vulnerable & Outdated Components",
+                        "score": 100,
+                        "risk": "BAJO",
+                        "findings_count": 0,
+                        "description": "Componentes, librerías y frameworks con vulnerabilidades conocidas sin actualizar."
+                    },
+                    "A07": {
+                        "code": "A07",
+                        "name": "Identification & Authentication Failures",
+                        "score": 100,
+                        "risk": "BAJO",
+                        "findings_count": 0,
+                        "description": "Fallas en la identificación y autenticación de usuarios."
+                    },
+                    "A08": {
+                        "code": "A08",
+                        "name": "Software & Data Integrity Failures",
+                        "score": 60,
+                        "risk": "MEDIO",
+                        "findings_count": 2,
+                        "description": "Código e infraestructura sin protección contra actualizaciones maliciosas."
+                    },
+                    "A09": {
+                        "code": "A09",
+                        "name": "Security Logging & Monitoring Failures",
+                        "score": 70,
+                        "risk": "MEDIO",
+                        "findings_count": 2,
+                        "description": "Falta de logging, monitoreo y alertas para detectar y responder a brechas de seguridad."
+                    },
+                    "A10": {
+                        "code": "A10",
+                        "name": "Server-Side Request Forgery (SSRF)",
+                        "score": 100,
+                        "risk": "BAJO",
+                        "findings_count": 0,
+                        "description": "La aplicación hace peticiones HTTP a URLs controladas por el usuario sin validación."
+                    }
+                },
+                "total_findings": 14,
+                "critical_owasp_items": 0,
+                "passed_checks": 5
+            },
+            "issues": [
+                {
+                    "severity": "HIGH",
+                    "file": "app/Policies",
+                    "line": 0,
+                    "message": "[A01] Sin Policies de autorización. Implementa Gates y Policies para control de acceso granular."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "[A01] Controlador sin checks de autorización visibles. Verifica que usa Policies o Gate::authorize()."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "[A01] Posible IDOR: Model::find($id) sin verificación de ownership. Verifica que el usuario tiene acceso al recurso: Route Model Binding con Policy."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "[A02] MD5 para datos sensibles. Usa Hash::make() (bcrypt/argon2) para contraseñas."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "[A03] Command Injection: ejecución de sistema con variable."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": "app/Services/PaymentService.php",
+                    "line": 0,
+                    "message": "[A03] Object Injection: unserialize() con datos del usuario es extremadamente peligroso. Usa JSON."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Http/Controllers/UserController.php",
+                    "line": 0,
+                    "message": "[A04] Método store/update sin validación visible. Usa Form Request Validation o $request->validate()."
+                },
+                {
+                    "severity": "CRITICAL",
+                    "file": ".env",
+                    "line": 0,
+                    "message": "[A05] APP_DEBUG=true. Deshabilita en producción."
+                },
+                {
+                    "severity": "LOW",
+                    "file": ".env",
+                    "line": 0,
+                    "message": "[A05] SESSION_DRIVER=file puede ser inseguro en servidores compartidos. Usa 'database' o 'redis'."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "config/session.php",
+                    "line": 0,
+                    "message": "[A05] Cookie SameSite no configurado como 'lax' o 'strict'. Protege contra CSRF."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "composer.json",
+                    "line": 0,
+                    "message": "[A07] Sin MFA detectado. Considera implementar autenticación de dos factores (2FA) con laravel/fortify."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "/",
+                    "line": 0,
+                    "message": "[A08] Sin configuración de CI/CD detectada. Implementa pipelines con 'composer audit' y tests automáticos."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "app/Services/PaymentService.php",
+                    "line": 0,
+                    "message": "[A08] Uso de unserialize(). Los datos deserializados pueden llevar a Remote Code Execution. Usa JSON::decode() en su lugar."
+                },
+                {
+                    "severity": "HIGH",
+                    "file": "config/logging.php",
+                    "line": 0,
+                    "message": "[A09] Sin configuración de logging detectada. El logging es crítico para detectar y responder a incidentes."
+                },
+                {
+                    "severity": "MEDIUM",
+                    "file": "app/",
+                    "line": 0,
+                    "message": "[A09] Sin logging de eventos de seguridad (fallos de login, acceso no autorizado). Agrega Log::warning() en AuthController y handlers de autorización."
+                }
+            ],
+            "recommendations": [
+                "Ejecuta 'composer audit' regularmente para detectar CVEs en dependencias. Integra en CI/CD."
+            ]
+        }
+    }
+}

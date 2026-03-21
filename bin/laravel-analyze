@@ -1,0 +1,37 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+// Auto-detect project root
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+$autoloaded = false;
+foreach ($autoloadPaths as $path) {
+    if (file_exists($path)) {
+        require $path;
+        $autoloaded = true;
+        break;
+    }
+}
+
+if (!$autoloaded) {
+    // Fallback manual autoload
+    spl_autoload_register(function (string $class) {
+        $base = dirname(__DIR__) . '/src/';
+        $relative = str_replace('LaravelAnalyzer\\', '', $class);
+        $file = $base . str_replace('\\', '/', $relative) . '.php';
+        if (file_exists($file)) {
+            require $file;
+        }
+    });
+}
+
+use LaravelAnalyzer\Console\Application;
+
+$app = new Application();
+$app->run($argv);
