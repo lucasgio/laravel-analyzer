@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace LaravelAnalyzer\Analyzers;
 
 /**
- * Analiza la cobertura de tests del proyecto Laravel.
+ * Analyzes the test coverage of a Laravel project.
  *
- * Detecta: tests unitarios, feature tests, presencia de clover.xml,
- * relación test/código, tests de modelos, controladores, servicios.
+ * Detects: unit tests, feature tests, presence of clover.xml,
+ * test-to-code ratio, coverage of models, controllers, and services.
  */
 class TestCoverageAnalyzer extends BaseAnalyzer
 {
@@ -50,7 +50,7 @@ class TestCoverageAnalyzer extends BaseAnalyzer
         // 4. Check for coverage XML report
         $coverageData = $this->parseCoverageReport($projectPath);
         $metrics['coverage_xml_found'] = $coverageData !== null;
-        $metrics['line_coverage'] = $coverageData['line_coverage'] ?? 'No disponible (ejecuta phpunit --coverage-clover)';
+        $metrics['line_coverage'] = $coverageData['line_coverage'] ?? 'Not available (run phpunit --coverage-clover)';
 
         // 5. Analyze test quality
         $qualityScore = $this->analyzeTestQuality($unitTests, $featureTests, $projectPath);
@@ -75,8 +75,8 @@ class TestCoverageAnalyzer extends BaseAnalyzer
         return $this->buildResult(
             $score,
             $metrics,
-            "Tests: {$testFiles} archivos. Unit: {$metrics['unit_tests']} | Feature: {$metrics['feature_tests']}. " .
-            "Cobertura: " . ($coverageData['line_coverage'] ?? 'N/A') . "."
+            "Tests: {$testFiles} files. Unit: {$metrics['unit_tests']} | Feature: {$metrics['feature_tests']}. " .
+            "Coverage: " . ($coverageData['line_coverage'] ?? 'N/A') . "."
         );
     }
 
@@ -160,7 +160,7 @@ class TestCoverageAnalyzer extends BaseAnalyzer
         // Penalize tests with too few assertions
         if ($avgAssertions < 1) {
             $score -= 20;
-            $this->addIssue('HIGH', 'tests/', sprintf("Promedio de assertions muy bajo (%.1f). Los tests podrían no verificar nada útil.", $avgAssertions));
+            $this->addIssue('HIGH', 'tests/', sprintf("Very low assertion average (%.1f). Tests may not be verifying anything meaningful.", $avgAssertions));
         } elseif ($avgAssertions >= 3) {
             $score += 15;
         }
@@ -194,11 +194,11 @@ class TestCoverageAnalyzer extends BaseAnalyzer
         $untested = [];
 
         $criticalPaths = [
-            'app/Http/Controllers' => 'Controladores HTTP',
-            'app/Models'           => 'Modelos Eloquent',
-            'app/Services'         => 'Servicios de negocio',
-            'app/Policies'         => 'Policies de autorización',
-            'app/Jobs'             => 'Jobs en cola',
+            'app/Http/Controllers' => 'HTTP Controllers',
+            'app/Models'           => 'Eloquent Models',
+            'app/Services'         => 'Business Services',
+            'app/Policies'         => 'Authorization Policies',
+            'app/Jobs'             => 'Queued Jobs',
             'app/Listeners'        => 'Event Listeners',
         ];
 
@@ -234,7 +234,7 @@ class TestCoverageAnalyzer extends BaseAnalyzer
                     'coverage' => $coverage . '%',
                 ];
                 if ($coverage < 30) {
-                    $this->addIssue('HIGH', $dir, "{$label}: Solo {$coverage}% de cobertura ({$testedCount}/{$sourceCount} archivos referenciados en tests).");
+                    $this->addIssue('HIGH', $dir, "{$label}: Only {$coverage}% coverage ({$testedCount}/{$sourceCount} files referenced in tests).");
                 }
             }
         }
@@ -278,26 +278,26 @@ class TestCoverageAnalyzer extends BaseAnalyzer
     private function generateRecommendations(array $metrics): void
     {
         if (!$metrics['has_test_config']) {
-            $this->addRecommendation("Configura PHPUnit o Pest: ejecuta 'composer require pestphp/pest --dev' e inicializa con 'php artisan pest:install'.");
+            $this->addRecommendation("Set up PHPUnit or Pest: run 'composer require pestphp/pest --dev' and initialize with 'php artisan pest:install'.");
         }
 
         if ($metrics['unit_tests'] === 0) {
-            $this->addRecommendation("Crea tests unitarios para servicios y modelos. Usa 'php artisan make:test NombreTest --unit'.");
+            $this->addRecommendation("Create unit tests for services and models. Use 'php artisan make:test NameTest --unit'.");
         }
 
         if ($metrics['feature_tests'] === 0) {
-            $this->addRecommendation("Agrega tests de feature para tus endpoints HTTP. Usa 'php artisan make:test NombreTest'.");
+            $this->addRecommendation("Add feature tests for your HTTP endpoints. Use 'php artisan make:test NameTest'.");
         }
 
         if (!$metrics['has_factories']) {
-            $this->addRecommendation("Crea Model Factories para generar datos de prueba: 'php artisan make:factory ModeloFactory'.");
+            $this->addRecommendation("Create Model Factories to generate test data: 'php artisan make:factory ModelFactory'.");
         }
 
         if (!$metrics['coverage_xml_found']) {
-            $this->addRecommendation("Genera el reporte de cobertura: 'php artisan test --coverage-clover=coverage.xml'. Apunta a mínimo 70%.");
+            $this->addRecommendation("Generate a coverage report: 'php artisan test --coverage-clover=coverage.xml'. Aim for at least 70%.");
         }
 
-        $this->addRecommendation("Usa RefreshDatabase en tests de feature para aislar el estado de la base de datos.");
-        $this->addRecommendation("Implementa CI/CD que ejecute los tests automáticamente en cada push (GitHub Actions, GitLab CI).");
+        $this->addRecommendation("Use RefreshDatabase in feature tests to isolate database state.");
+        $this->addRecommendation("Implement CI/CD to run tests automatically on every push (GitHub Actions, GitLab CI).");
     }
 }
