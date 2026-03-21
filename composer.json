@@ -1,9 +1,21 @@
 {
     "name": "laravel-analyzer/cli",
-    "description": "Static analysis CLI and MCP server for Laravel projects",
+    "description": "Static analysis CLI and MCP server for Laravel projects — zero dependencies, pure PHP 8.2+",
     "type": "library",
     "license": "MIT",
-    "keywords": ["laravel", "static-analysis", "code-quality", "security", "owasp", "mcp"],
+    "keywords": ["laravel", "static-analysis", "code-quality", "security", "owasp", "mcp", "cli"],
+    "homepage": "https://github.com/lucasgio/laravel-analyzer",
+    "authors": [
+        {
+            "name": "lucasgio",
+            "homepage": "https://github.com/lucasgio",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/lucasgio/laravel-analyzer/issues",
+        "source": "https://github.com/lucasgio/laravel-analyzer"
+    },
     "require": {
         "php": ">=8.2"
     },
@@ -26,5 +38,8 @@
         "test:integration": "vendor/bin/phpunit --testsuite=Integration",
         "test:coverage": "vendor/bin/phpunit --coverage-clover=build/coverage/clover.xml --coverage-html=build/coverage/html"
     },
-    "bin": ["bin/laravel-analyze", "bin/laravel-analyze-mcp"]
+    "bin": ["bin/laravel-analyze", "bin/laravel-analyze-mcp"],
+    "config": {
+        "sort-packages": true
+    }
 }
