@@ -253,23 +253,45 @@ class RefactoringAnalyzer extends BaseAnalyzer
 
     private function collectMethodHashes(string $content, string $file, array &$hashes): void
     {
-        // Extract method bodies (simplified — finds content between braces)
+        // Find method start positions and extract bodies by tracking brace depth.
+        // This handles nested braces (loops, closures) that a simple [^{}] regex cannot.
         preg_match_all(
-            '/(?:public|protected|private)\s+function\s+\w+\s*\([^)]*\)\s*(?::\s*\S+\s*)?\{([^{}]{80,})\}/s',
+            '/(?:public|protected|private)\s+function\s+\w+\s*\([^)]*\)\s*(?::\s*\S+\s*)?\{/s',
             $content,
-            $matches
+            $matches,
+            PREG_OFFSET_CAPTURE
         );
 
-        foreach ($matches[1] as $body) {
-            // Normalize: strip whitespace, variable names, string literals
-            $normalized = preg_replace(['/\$\w+/', '/["\'][^"\']*["\']/', '/\s+/'], ['$v', '""', ' '], trim($body));
-            $hash       = md5($normalized);
+        foreach ($matches[0] as [$match, $offset]) {
+            $body  = '';
+            $depth = 1;
+            $pos   = $offset + strlen($match);
+            $len   = strlen($content);
 
-            if (strlen($normalized) < 120) {
-                continue; // too small to be a meaningful duplicate
+            while ($pos < $len && $depth > 0) {
+                $ch = $content[$pos];
+                if ($ch === '{') {
+                    $depth++;
+                } elseif ($ch === '}') {
+                    $depth--;
+                    if ($depth === 0) break;
+                }
+                $body .= $ch;
+                $pos++;
             }
 
-            $hashes[$hash][] = $file;
+            // Normalize: collapse variable names, string literals, whitespace
+            $normalized = preg_replace(
+                ['/\$\w+/', '/(["\'])[^"\']*\1/', '/\s+/'],
+                ['$v',      '""',                  ' '],
+                trim($body)
+            );
+
+            if (strlen($normalized) < 120) {
+                continue; // too short to be a meaningful duplicate
+            }
+
+            $hashes[md5($normalized)][] = $file;
         }
     }
 
