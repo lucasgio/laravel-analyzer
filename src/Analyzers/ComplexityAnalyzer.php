@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace LaravelAnalyzer\Analyzers;
 
 /**
- * Analiza la Complejidad Ciclomática y el Riesgo de Refactorización.
+ * Analyzes Cyclomatic Complexity and Refactoring Risk.
  *
- * - Complejidad Ciclomática: número de rutas independientes en el código
- * - Detecta: métodos con alta complejidad, anidamiento profundo, duplicación,
- *   violaciones de DRY, clases difíciles de refactorizar
+ * - Cyclomatic Complexity: number of independent paths through the code
+ * - Detects: high-complexity methods, deep nesting, duplication,
+ *   DRY violations, and classes that are hard to refactor
  */
 class ComplexityAnalyzer extends BaseAnalyzer
 {
@@ -84,16 +84,16 @@ class ComplexityAnalyzer extends BaseAnalyzer
                     $this->addIssue(
                         'CRITICAL',
                         $relativePath,
-                        "Complejidad Ciclomática CRÍTICA: {$className}::{$method['name']}() = {$cc}. " .
-                        "Valores > " . self::CYCLOMATIC_HIGH . " indican código muy difícil de testear y mantener."
+                        "CRITICAL Cyclomatic Complexity: {$className}::{$method['name']}() = {$cc}. " .
+                        "Values > " . self::CYCLOMATIC_HIGH . " indicate code that is very hard to test and maintain."
                     );
                 } elseif ($cc > self::CYCLOMATIC_MEDIUM) {
                     $highComplexity[] = $entry;
                     $this->addIssue(
                         'HIGH',
                         $relativePath,
-                        "Alta Complejidad Ciclomática: {$className}::{$method['name']}() = {$cc}. " .
-                        "Recomendado máximo: " . self::CYCLOMATIC_MEDIUM . "."
+                        "High Cyclomatic Complexity: {$className}::{$method['name']}() = {$cc}. " .
+                        "Recommended maximum: " . self::CYCLOMATIC_MEDIUM . "."
                     );
                 }
             }
@@ -105,8 +105,8 @@ class ComplexityAnalyzer extends BaseAnalyzer
                 $this->addIssue(
                     'MEDIUM',
                     $relativePath,
-                    "Anidamiento profundo detectado en '{$className}' (profundidad: {$maxNesting}). " .
-                    "Considera extraer métodos o usar cláusulas de guarda (return early)."
+                    "Deep nesting detected in '{$className}' (depth: {$maxNesting}). " .
+                    "Consider extracting methods or using guard clauses (return early)."
                 );
             }
 
@@ -145,8 +145,8 @@ class ComplexityAnalyzer extends BaseAnalyzer
                 'critical' => count(array_filter($allComplexities, fn($c) => $c['complexity'] > self::CYCLOMATIC_HIGH)),
             ],
             'most_complex_methods' => array_slice($allComplexities, 0, 5),
-        ], sprintf("CC promedio: %.2f. Métodos de alta complejidad: %d.", $avgComplexity, count($highComplexity)) .
-           ". Anidamiento profundo: " . count($deepNesting) . " clases. Duplicación: {$duplicateCount} bloques.");
+        ], sprintf("Average CC: %.2f. High-complexity methods: %d.", $avgComplexity, count($highComplexity)) .
+           ". Deep nesting: " . count($deepNesting) . " classes. Duplication: {$duplicateCount} blocks.");
     }
 
     private function extractMethods(string $content): array
@@ -307,24 +307,24 @@ class ComplexityAnalyzer extends BaseAnalyzer
     private function generateComplexityRecommendations(float $avgCC, array $highComplexity, array $deepNesting, int $duplicates): void
     {
         if ($avgCC > self::CYCLOMATIC_MEDIUM) {
-            $this->addRecommendation("Apunta a una Complejidad Ciclomática promedio < " . self::CYCLOMATIC_MEDIUM . ". Descompón métodos complejos en más pequeños.");
+            $this->addRecommendation("Aim for an average Cyclomatic Complexity < " . self::CYCLOMATIC_MEDIUM . ". Break complex methods into smaller ones.");
         }
 
         if (!empty($highComplexity)) {
             $worst = $highComplexity[0];
-            $this->addRecommendation("El método más complejo es '{$worst['class']}::{$worst['method']}' (CC={$worst['complexity']}). " .
-                "Prioriza refactorizarlo: extrae métodos, usa Strategy pattern o simplifica condicionales.");
+            $this->addRecommendation("The most complex method is '{$worst['class']}::{$worst['method']}' (CC={$worst['complexity']}). " .
+                "Prioritize refactoring it: extract methods, apply the Strategy pattern, or simplify conditionals.");
         }
 
         if (!empty($deepNesting)) {
-            $this->addRecommendation("Reduce el anidamiento profundo usando 'Return Early' (guard clauses): retorna o lanza excepciones pronto en lugar de anidar if/else.");
+            $this->addRecommendation("Reduce deep nesting with 'Return Early' (guard clauses): return or throw exceptions early instead of nesting if/else blocks.");
         }
 
         if ($duplicates > 20) {
-            $this->addRecommendation("Alta duplicación de código detectada ({$duplicates} bloques). Aplica el principio DRY: extrae métodos, traits, o helpers compartidos.");
+            $this->addRecommendation("High code duplication detected ({$duplicates} blocks). Apply the DRY principle: extract shared methods, traits, or helpers.");
         }
 
-        $this->addRecommendation("Instala PHPStan con Larastan para detección automática de complejidad: 'composer require --dev nunomaduro/larastan'.");
-        $this->addRecommendation("Configura un límite de complejidad en CI/CD. PHPStan y PHPMD pueden rechazar código con CC > 10 automáticamente.");
+        $this->addRecommendation("Install PHPStan with Larastan for automated complexity detection: 'composer require --dev nunomaduro/larastan'.");
+        $this->addRecommendation("Configure a complexity limit in CI/CD. PHPStan and PHPMD can reject code with CC > 10 automatically.");
     }
 }

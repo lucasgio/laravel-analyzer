@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace LaravelAnalyzer\Analyzers;
 
 /**
- * Analiza riesgos de seguridad específicos de Laravel.
+ * Analyzes Laravel-specific security risks.
  *
- * Detecta: SQL Injection, Mass Assignment, XSS, CSRF bypass,
- * exposición de datos sensibles, configuraciones inseguras.
+ * Detects: SQL Injection, Mass Assignment, XSS, CSRF bypass,
+ * sensitive data exposure, and insecure configurations.
  */
 class SecurityAnalyzer extends BaseAnalyzer
 {
@@ -16,20 +16,20 @@ class SecurityAnalyzer extends BaseAnalyzer
         // SQL Injection risks
         'sql_injection' => [
             '/DB::(?:select|insert|update|delete|statement)\s*\(\s*["\'][^"\']*\.\s*\$/' => [
-                'label'    => 'Posible SQL Injection',
-                'desc'     => 'Concatenación de variable en query SQL cruda. Usa bindings: DB::select("query", [$variable])',
+                'label'    => 'Possible SQL Injection',
+                'desc'     => 'Variable concatenated into a raw SQL query. Use bindings: DB::select("query", [$variable])',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A03:2021',
             ],
             '/->whereRaw\s*\(\s*["\'][^"\']*\.\s*\$/' => [
-                'label'    => 'SQL Injection en whereRaw()',
-                'desc'     => 'Concatenación directa en whereRaw(). Usa bindings: ->whereRaw("col = ?", [$value])',
+                'label'    => 'SQL Injection in whereRaw()',
+                'desc'     => 'Direct concatenation in whereRaw(). Use bindings: ->whereRaw("col = ?", [$value])',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A03:2021',
             ],
             '/->(?:selectRaw|havingRaw|groupByRaw|orderByRaw)\s*\(\s*.*\.\s*\$/' => [
-                'label'    => 'SQL Injection en método Raw',
-                'desc'     => 'Variable concatenada en método *Raw(). Usa parámetros vinculados.',
+                'label'    => 'SQL Injection in Raw method',
+                'desc'     => 'Variable concatenated in a *Raw() method. Use bound parameters.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A03:2021',
             ],
@@ -38,26 +38,26 @@ class SecurityAnalyzer extends BaseAnalyzer
         // Mass Assignment
         'mass_assignment' => [
             '/\$fillable\s*=\s*\[\s*\]/' => [
-                'label'    => 'Mass Assignment: \$fillable vacío',
-                'desc'     => '\$fillable vacío en el modelo. Define explícitamente los campos permitidos.',
+                'label'    => 'Mass Assignment: empty \$fillable',
+                'desc'     => 'Empty \$fillable in model. Explicitly define the allowed fields.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A01:2021',
             ],
             '/protected\s+\$guarded\s*=\s*\[\s*\]/' => [
-                'label'    => 'Mass Assignment: \$guarded vacío',
-                'desc'     => '\$guarded = [] desactiva todas las protecciones de mass assignment. Muy peligroso.',
+                'label'    => 'Mass Assignment: empty \$guarded',
+                'desc'     => '\$guarded = [] disables all mass assignment protections. Very dangerous.',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A01:2021',
             ],
             '/->fill\s*\(\s*\$request->all\s*\(\s*\)\s*\)/' => [
-                'label'    => 'Mass Assignment con \$request->all()',
-                'desc'     => 'Usar fill(\$request->all()) puede asignar campos no deseados. Usa only() o validated().',
+                'label'    => 'Mass Assignment with \$request->all()',
+                'desc'     => 'Using fill(\$request->all()) can assign unintended fields. Use only() or validated() instead.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A01:2021',
             ],
             '/::create\s*\(\s*\$request->all\s*\(\s*\)\s*\)/' => [
                 'label'    => 'Mass Assignment: Model::create(\$request->all())',
-                'desc'     => 'Model::create(\$request->all()) es peligroso. Usa \$request->validated() o \$request->only([...]).',
+                'desc'     => 'Model::create(\$request->all()) is dangerous. Use \$request->validated() or \$request->only([...]).',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A01:2021',
             ],
@@ -67,13 +67,13 @@ class SecurityAnalyzer extends BaseAnalyzer
         'xss' => [
             '/\{!!\s*\$(?!cspNonce)/' => [
                 'label'    => 'XSS: Blade unescaped output',
-                'desc'     => '{!! !!} renderiza HTML sin escapar. Solo úsalo con datos de confianza. Para datos del usuario usa {{ }}.',
+                'desc'     => '{!! !!} renders HTML without escaping. Only use with trusted data. For user input use {{ }}.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A03:2021',
             ],
             '/echo\s+\$request->/' => [
-                'label'    => 'XSS: echo de input del usuario',
-                'desc'     => 'echo directo de input del usuario sin escapar. Usa htmlspecialchars() o las plantillas Blade.',
+                'label'    => 'XSS: echo of user input',
+                'desc'     => 'Direct echo of user input without escaping. Use htmlspecialchars() or Blade templates.',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A03:2021',
             ],
@@ -82,14 +82,14 @@ class SecurityAnalyzer extends BaseAnalyzer
         // Authentication & Authorization
         'auth' => [
             '/Route::(?:get|post|put|patch|delete)\s*\([^)]+\)\s*(?:->name\([^)]+\))?(?:->middleware\([^)]*\))?\s*;(?!\s*\/\/)/' => [
-                'label'    => 'Ruta sin middleware de autenticación',
-                'desc'     => 'Verifica que las rutas sensibles tengan ->middleware("auth") o estén dentro de grupos protegidos.',
+                'label'    => 'Route without authentication middleware',
+                'desc'     => 'Verify that sensitive routes have ->middleware("auth") or are inside protected groups.',
                 'severity' => 'MEDIUM',
                 'owasp'    => 'A01:2021',
             ],
             '/\bauth\(\)\s*->\s*user\s*\(\)\s*->(?!id\b|name\b|email\b)/' => [
-                'label'    => 'Acceso a propiedades de usuario sin verificación',
-                'desc'     => 'Accede a propiedades del usuario autenticado después de verificar que no es null.',
+                'label'    => 'Accessing user properties without null check',
+                'desc'     => 'Access authenticated user properties only after verifying the user is not null.',
                 'severity' => 'LOW',
                 'owasp'    => 'A07:2021',
             ],
@@ -98,26 +98,26 @@ class SecurityAnalyzer extends BaseAnalyzer
         // Sensitive data exposure
         'data_exposure' => [
             '/\bdd\s*\(/' => [
-                'label'    => 'dd() en código de producción',
-                'desc'     => 'dd() expone información interna. Elimínalo antes de hacer deploy.',
+                'label'    => 'dd() in production code',
+                'desc'     => 'dd() exposes internal information. Remove it before deploying.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A05:2021',
             ],
             '/\bvar_dump\s*\(/' => [
-                'label'    => 'var_dump() en código de producción',
-                'desc'     => 'var_dump() puede exponer datos sensibles. Usa el logger de Laravel.',
+                'label'    => 'var_dump() in production code',
+                'desc'     => 'var_dump() can expose sensitive data. Use Laravel\'s logger instead.',
                 'severity' => 'MEDIUM',
                 'owasp'    => 'A05:2021',
             ],
             '/\bprint_r\s*\(/' => [
-                'label'    => 'print_r() en código de producción',
-                'desc'     => 'print_r() puede exponer datos sensibles. Usa Log::debug() para debugging.',
+                'label'    => 'print_r() in production code',
+                'desc'     => 'print_r() can expose sensitive data. Use Log::debug() for debugging.',
                 'severity' => 'MEDIUM',
                 'owasp'    => 'A05:2021',
             ],
             '/->password\b/' => [
-                'label'    => 'Acceso directo a campo password',
-                'desc'     => 'Verifica que los campos password estén ocultos en \$hidden del modelo y nunca se expongan en respuestas JSON.',
+                'label'    => 'Direct access to password field',
+                'desc'     => 'Ensure password fields are listed in \$hidden on the model and never exposed in JSON responses.',
                 'severity' => 'MEDIUM',
                 'owasp'    => 'A02:2021',
             ],
@@ -126,14 +126,14 @@ class SecurityAnalyzer extends BaseAnalyzer
         // Command Injection
         'command_injection' => [
             '/\b(?:exec|shell_exec|system|passthru|popen)\s*\(\s*.*\$/' => [
-                'label'    => 'Command Injection: ejecución de comandos con variable',
-                'desc'     => 'Ejecución de comandos del sistema con datos potencialmente no sanitizados. Extremadamente peligroso.',
+                'label'    => 'Command Injection: system command with variable',
+                'desc'     => 'Executing system commands with potentially unsanitized data. Extremely dangerous.',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A03:2021',
             ],
             '/\beval\s*\(/' => [
-                'label'    => 'Uso de eval()',
-                'desc'     => 'eval() ejecuta código PHP arbitrario. Nunca usarlo con datos del usuario.',
+                'label'    => 'Use of eval()',
+                'desc'     => 'eval() runs arbitrary PHP code. Never use it with user-supplied data.',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A03:2021',
             ],
@@ -142,20 +142,20 @@ class SecurityAnalyzer extends BaseAnalyzer
         // Cryptographic failures
         'crypto' => [
             '/\bmd5\s*\(/' => [
-                'label'    => 'Uso de MD5 (hash débil)',
-                'desc'     => 'MD5 no es seguro para hashing de contraseñas. Usa bcrypt() o Hash::make().',
+                'label'    => 'Use of MD5 (weak hash)',
+                'desc'     => 'MD5 is not secure for password hashing. Use bcrypt() or Hash::make().',
                 'severity' => 'HIGH',
                 'owasp'    => 'A02:2021',
             ],
             '/\bsha1\s*\(/' => [
-                'label'    => 'Uso de SHA1 (hash débil)',
-                'desc'     => 'SHA1 es inseguro para datos sensibles. Usa Hash::make() con bcrypt para contraseñas.',
+                'label'    => 'Use of SHA1 (weak hash)',
+                'desc'     => 'SHA1 is insecure for sensitive data. Use Hash::make() with bcrypt for passwords.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A02:2021',
             ],
             '/password_hash\s*\([^,]+,\s*PASSWORD_DEFAULT\s*,\s*\[\s*["\'"]cost["\'\"]\s*=>\s*[1-9]\s*\]\s*\)/' => [
-                'label'    => 'Bcrypt con bajo factor de coste',
-                'desc'     => 'Factor de coste bcrypt muy bajo. El mínimo recomendado es 12.',
+                'label'    => 'Bcrypt with low cost factor',
+                'desc'     => 'Bcrypt cost factor is too low. Minimum recommended value is 12.',
                 'severity' => 'MEDIUM',
                 'owasp'    => 'A02:2021',
             ],
@@ -164,8 +164,8 @@ class SecurityAnalyzer extends BaseAnalyzer
         // File inclusion
         'file_inclusion' => [
             '/\b(?:include|require)(?:_once)?\s*\(\s*\$/' => [
-                'label'    => 'File Inclusion con variable',
-                'desc'     => 'Include/require con variable puede llevar a Remote/Local File Inclusion. Valida y sanitiza la ruta.',
+                'label'    => 'File Inclusion with variable',
+                'desc'     => 'include/require with a variable can lead to Remote/Local File Inclusion. Validate and sanitize the path.',
                 'severity' => 'CRITICAL',
                 'owasp'    => 'A03:2021',
             ],
@@ -175,7 +175,7 @@ class SecurityAnalyzer extends BaseAnalyzer
         'redirect' => [
             '/return\s+redirect\(\s*\$request->(?:get|input|query)/' => [
                 'label'    => 'Open Redirect',
-                'desc'     => 'Redirect con URL del usuario puede llevar a Open Redirect. Valida que la URL sea interna.',
+                'desc'     => 'Redirecting to a user-supplied URL can lead to Open Redirect attacks. Validate that the URL is internal.',
                 'severity' => 'HIGH',
                 'owasp'    => 'A01:2021',
             ],
@@ -256,8 +256,8 @@ class SecurityAnalyzer extends BaseAnalyzer
                 array_filter($vulnerabilities, fn($v) => $v['severity'] === 'CRITICAL' || $v['severity'] === 'HIGH'),
                 0, 10
             ),
-        ], "Vulnerabilidades: {$criticalCount} críticas, {$highCount} altas, {$mediumCount} medias. " .
-           "Total: " . count($vulnerabilities) . " problemas.");
+        ], "Vulnerabilities: {$criticalCount} critical, {$highCount} high, {$mediumCount} medium. " .
+           "Total: " . count($vulnerabilities) . " issues.");
     }
 
     private function checkSecurityConfiguration(string $projectPath): array
@@ -271,11 +271,11 @@ class SecurityAnalyzer extends BaseAnalyzer
 
             if (preg_match('/APP_DEBUG\s*=\s*true/i', $env) &&
                 preg_match('/APP_ENV\s*=\s*production/i', $env)) {
-                $issues[] = ['severity' => 'CRITICAL', 'msg' => 'APP_DEBUG=true en producción expone stacktraces y variables de entorno.'];
+                $issues[] = ['severity' => 'CRITICAL', 'msg' => 'APP_DEBUG=true in production exposes stack traces and environment variables.'];
             }
 
             if (!preg_match('/SESSION_SECURE_COOKIE\s*=\s*true/i', $env)) {
-                $issues[] = ['severity' => 'MEDIUM', 'msg' => 'SESSION_SECURE_COOKIE no está en true. Las cookies de sesión deberían ser HTTPS-only.'];
+                $issues[] = ['severity' => 'MEDIUM', 'msg' => 'SESSION_SECURE_COOKIE is not set to true. Session cookies should be HTTPS-only.'];
             }
         }
 
@@ -284,7 +284,7 @@ class SecurityAnalyzer extends BaseAnalyzer
         if (file_exists($corsConfig)) {
             $content = $this->readFile($corsConfig);
             if (str_contains($content, "'*'") && str_contains($content, 'allowed_origins')) {
-                $issues[] = ['severity' => 'HIGH', 'msg' => "CORS configurado con wildcard ('*'). Limita los orígenes permitidos."];
+                $issues[] = ['severity' => 'HIGH', 'msg' => "CORS configured with wildcard ('*'). Restrict to specific allowed origins."];
             }
         }
 
@@ -295,7 +295,7 @@ class SecurityAnalyzer extends BaseAnalyzer
             $hasAuth = isset($composer['require']['laravel/sanctum']) ||
                        isset($composer['require']['laravel/passport']);
             if (!$hasAuth) {
-                $issues[] = ['severity' => 'MEDIUM', 'msg' => 'Sin paquete de autenticación API (Sanctum/Passport). Si tienes API, implementa autenticación.'];
+                $issues[] = ['severity' => 'MEDIUM', 'msg' => 'No API authentication package found (Sanctum/Passport). If you have an API, implement authentication.'];
             }
         }
 
@@ -316,24 +316,24 @@ class SecurityAnalyzer extends BaseAnalyzer
         $categories = array_unique(array_column($vulns, 'category'));
 
         if (in_array('sql_injection', $categories)) {
-            $this->addRecommendation("SQL Injection: Usa SIEMPRE el Query Builder de Laravel con bindings o Eloquent. Nunca concatenes variables en queries SQL.");
+            $this->addRecommendation("SQL Injection: ALWAYS use Laravel's Query Builder with bindings or Eloquent. Never concatenate variables into SQL queries.");
         }
 
         if (in_array('mass_assignment', $categories)) {
-            $this->addRecommendation("Mass Assignment: Define \$fillable explícitamente en cada modelo. Usa \$request->validated() en lugar de \$request->all().");
+            $this->addRecommendation("Mass Assignment: Explicitly define \$fillable on every model. Use \$request->validated() instead of \$request->all().");
         }
 
         if (in_array('xss', $categories)) {
-            $this->addRecommendation("XSS: Usa {{ }} de Blade (auto-escapa). Evita {!! !!} excepto para HTML de confianza. Implementa Content Security Policy (CSP).");
+            $this->addRecommendation("XSS: Use Blade's {{ }} (auto-escapes). Avoid {!! !!} except for trusted HTML. Implement Content Security Policy (CSP).");
         }
 
         if (in_array('crypto', $categories)) {
-            $this->addRecommendation("Criptografía: Usa Hash::make() (bcrypt por defecto) para contraseñas. Nunca MD5 o SHA1. Para tokens, usa Str::random() o bin2hex(random_bytes(32)).");
+            $this->addRecommendation("Cryptography: Use Hash::make() (bcrypt by default) for passwords. Never MD5 or SHA1. For tokens use Str::random() or bin2hex(random_bytes(32)).");
         }
 
-        $this->addRecommendation("Ejecuta 'php artisan audit' con laravel-security-checker: 'composer require enlightn/enlightn --dev && php artisan enlightn'.");
-        $this->addRecommendation("Configura Content Security Policy headers usando spatie/laravel-csp: 'composer require spatie/laravel-csp'.");
-        $this->addRecommendation("Revisa las recomendaciones de seguridad de Laravel: https://laravel.com/docs/security");
-        $this->addRecommendation("Ejecuta 'composer audit' regularmente para detectar vulnerabilidades en dependencias.");
+        $this->addRecommendation("Run a security audit with Enlightn: 'composer require enlightn/enlightn --dev && php artisan enlightn'.");
+        $this->addRecommendation("Configure Content Security Policy headers with spatie/laravel-csp: 'composer require spatie/laravel-csp'.");
+        $this->addRecommendation("Review Laravel's security documentation: https://laravel.com/docs/security");
+        $this->addRecommendation("Run 'composer audit' regularly to detect vulnerabilities in dependencies.");
     }
 }

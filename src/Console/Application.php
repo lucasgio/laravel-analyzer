@@ -18,7 +18,7 @@ class Application
     private const BANNER = <<<'BANNER'
     ╔══════════════════════════════════════════════════════════════╗
     ║          Laravel Best Practices Analyzer v%s                 ║
-    ║     Acoplamiento · Cohesión · Tests · Seguridad · OWASP      ║
+    ║       Coupling · Cohesion · Tests · Security · OWASP         ║
     ╚══════════════════════════════════════════════════════════════╝
     BANNER;
 
@@ -88,7 +88,7 @@ class Application
     private function validateProjectPath(): void
     {
         if (!is_dir($this->projectPath)) {
-            $this->error("El directorio '{$this->projectPath}' no existe.");
+            $this->error("Directory '{$this->projectPath}' does not exist.");
             exit(1);
         }
 
@@ -98,9 +98,9 @@ class Application
                      (file_exists($this->projectPath . '/composer.json') && $this->isLaravelComposer());
 
         if (!$isLaravel) {
-            $this->warning("⚠  No se detectó un proyecto Laravel estándar. Continuando de todas formas...");
+            $this->warning("⚠  No standard Laravel project detected. Continuing anyway...");
         } else {
-            $this->success("✓ Proyecto Laravel detectado en: {$this->projectPath}");
+            $this->success("✓ Laravel project detected at: {$this->projectPath}");
         }
 
         echo PHP_EOL;
@@ -120,7 +120,7 @@ class Application
         $analyzers = $this->getAnalyzers();
         $only = $this->options['only'] ?? null;
 
-        echo $this->color("\n📊 INICIANDO ANÁLISIS\n", 'cyan');
+        echo $this->color("\n📊 STARTING ANALYSIS\n", 'cyan');
         echo str_repeat('─', 60) . PHP_EOL;
 
         foreach ($analyzers as $key => $analyzer) {
@@ -128,7 +128,7 @@ class Application
                 continue;
             }
 
-            echo $this->color("  → Analizando: ", 'yellow') . $analyzer['name'] . "...";
+            echo $this->color("  → Analyzing: ", 'yellow') . $analyzer['name'] . "...";
             flush();
 
             try {
@@ -147,11 +147,11 @@ class Application
     private function getAnalyzers(): array
     {
         return [
-            'coupling'    => ['name' => 'Acoplamiento & Cohesión',     'instance' => new CouplingCohesionAnalyzer()],
-            'testing'     => ['name' => 'Cobertura de Tests',          'instance' => new TestCoverageAnalyzer()],
-            'debt'        => ['name' => 'Deuda Técnica',               'instance' => new TechnicalDebtAnalyzer()],
-            'complexity'  => ['name' => 'Complejidad de Refactorización', 'instance' => new ComplexityAnalyzer()],
-            'security'    => ['name' => 'Riesgo de Seguridad Laravel', 'instance' => new SecurityAnalyzer()],
+            'coupling'    => ['name' => 'Coupling & Cohesion',         'instance' => new CouplingCohesionAnalyzer()],
+            'testing'     => ['name' => 'Test Coverage',               'instance' => new TestCoverageAnalyzer()],
+            'debt'        => ['name' => 'Technical Debt',              'instance' => new TechnicalDebtAnalyzer()],
+            'complexity'  => ['name' => 'Refactoring Complexity',      'instance' => new ComplexityAnalyzer()],
+            'security'    => ['name' => 'Laravel Security Risk',       'instance' => new SecurityAnalyzer()],
             'owasp'       => ['name' => 'OWASP Top 10',                'instance' => new OwaspAnalyzer()],
         ];
     }
@@ -186,7 +186,7 @@ class Application
     {
         $outputPath = $this->options['output'] ?? "laravel-analysis-report.{$ext}";
         file_put_contents($outputPath, $content);
-        $this->success("✓ Reporte guardado en: {$outputPath}");
+        $this->success("✓ Report saved to: {$outputPath}");
     }
 
     private function printSummary(): void
@@ -198,7 +198,7 @@ class Application
         $threshold = $this->options['threshold'];
 
         echo PHP_EOL . str_repeat('═', 60) . PHP_EOL;
-        echo $this->color("  PUNTUACIÓN GLOBAL DEL PROYECTO: ", 'white');
+        echo $this->color("  GLOBAL PROJECT SCORE: ", 'white');
 
         $scoreColor = $avg >= 80 ? 'green' : ($avg >= $threshold ? 'yellow' : 'red');
         echo $this->color(sprintf("%.1f/100", $avg), $scoreColor);
@@ -208,9 +208,9 @@ class Application
         echo str_repeat('═', 60) . PHP_EOL . PHP_EOL;
 
         if ($avg < $threshold) {
-            $this->warning("⚠  El proyecto está por debajo del umbral mínimo ({$threshold}/100)");
+            $this->warning("⚠  Project is below the minimum quality threshold ({$threshold}/100)");
         } else {
-            $this->success("✓ El proyecto supera el umbral de calidad ({$threshold}/100)");
+            $this->success("✓ Project meets the quality threshold ({$threshold}/100)");
         }
         echo PHP_EOL;
     }
@@ -237,27 +237,27 @@ class Application
     {
         echo <<<HELP
 
-{$this->color('USO:', 'yellow')}
-  laravel-analyze [ruta-proyecto] [opciones]
+{$this->color('USAGE:', 'yellow')}
+  laravel-analyze [project-path] [options]
 
-{$this->color('OPCIONES:', 'yellow')}
-  -h, --help              Muestra esta ayuda
-  -v, --version           Versión del CLI
-  --format=FORMATO        Formato de salida: console (default), json, html, markdown
-  --output=ARCHIVO        Ruta del archivo de salida
-  --only=MODULOS          Ejecutar solo ciertos módulos (separados por coma)
-  --threshold=N           Umbral mínimo de puntuación (default: 60)
-  --no-color              Sin colores en la salida
+{$this->color('OPTIONS:', 'yellow')}
+  -h, --help              Show this help message
+  -v, --version           Show CLI version
+  --format=FORMAT         Output format: console (default), json, html, markdown
+  --output=FILE           Output file path
+  --only=MODULES          Run only specific modules (comma-separated)
+  --threshold=N           Minimum quality score threshold (default: 60)
+  --no-color              Disable colored output
 
-{$this->color('MÓDULOS DISPONIBLES:', 'yellow')}
-  coupling    Acoplamiento y Cohesión entre clases
-  testing     Cobertura de Tests (Unit, Feature, Integration)
-  debt        Riesgo de Deuda Técnica
-  complexity  Complejidad y riesgo de Refactorización
-  security    Riesgo de Seguridad específico de Laravel
-  owasp       Verificación OWASP Top 10
+{$this->color('AVAILABLE MODULES:', 'yellow')}
+  coupling    Class coupling and cohesion analysis
+  testing     Test coverage (Unit, Feature, Integration)
+  debt        Technical debt risk
+  complexity  Cyclomatic complexity and refactoring risk
+  security    Laravel-specific security risks
+  owasp       OWASP Top 10 compliance check
 
-{$this->color('EJEMPLOS:', 'yellow')}
+{$this->color('EXAMPLES:', 'yellow')}
   laravel-analyze /var/www/my-app
   laravel-analyze . --format=html --output=report.html
   laravel-analyze . --only=security,owasp
