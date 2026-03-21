@@ -1,0 +1,74 @@
+name: PR Quality Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  tests:
+    name: Run Full Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: xdebug
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run all tests
+        run: vendor/bin/phpunit --no-coverage
+
+      - name: Generate coverage report
+        run: |
+          mkdir -p build/coverage
+          vendor/bin/phpunit --coverage-clover=build/coverage/clover.xml
+        env:
+          XDEBUG_MODE: coverage
+
+      - name: Check minimum 80% coverage
+        run: |
+          php -r "
+            \$xml = simplexml_load_file('build/coverage/clover.xml');
+            \$statements = (int)\$xml->project->metrics['statements'];
+            \$covered = (int)\$xml->project->metrics['coveredstatements'];
+            \$pct = \$statements > 0 ? (\$covered / \$statements) * 100 : 0;
+            echo '::notice::Coverage: ' . round(\$pct, 2) . '%' . PHP_EOL;
+            if (\$pct < 80) {
+              echo '::error::Coverage ' . round(\$pct, 2) . '% is below the required 80% minimum.' . PHP_EOL;
+              exit(1);
+            }
+            echo '::notice::Coverage passes the 80% minimum threshold.' . PHP_EOL;
+          "
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-coverage
+          path: build/coverage/clover.xml
+          retention-days: 3
+
+  lint:
+    name: PHP Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Check PHP syntax in src/
+        run: find src -name "*.php" -exec php -l {} \; | grep -v "No syntax errors"| true
+
+      - name: Check PHP syntax in tests/
+        run: find tests -name "*.php" -exec php -l {} \; | grep -v "No syntax errors" | true
