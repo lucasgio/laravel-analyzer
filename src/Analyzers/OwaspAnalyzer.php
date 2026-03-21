@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace LaravelAnalyzer\Analyzers;
 
 /**
- * Analiza el proyecto contra el OWASP Top 10 (2021).
+ * Analyzes the project against the OWASP Top 10 (2021).
  *
  * A01: Broken Access Control
  * A02: Cryptographic Failures
@@ -52,7 +52,7 @@ class OwaspAnalyzer extends BaseAnalyzer
             'critical_owasp_items' => $criticalOwaspItems,
             'passed_checks'        => count(array_filter($this->owaspResults, fn($r) => $r['score'] >= 80)),
         ], "OWASP Score: " . round($avgScore, 1) . "/100. Categorías críticas: {$criticalOwaspItems}/10. " .
-           "Total hallazgos: {$totalFindings}.");
+           "Total findings: {$totalFindings}.");
     }
 
     private function checkA01BrokenAccessControl(string $projectPath): void
@@ -65,7 +65,7 @@ class OwaspAnalyzer extends BaseAnalyzer
         $hasPolicies = is_dir($policyPath) && count($this->getPhpFiles($policyPath)) > 0;
         if (!$hasPolicies) {
             $findings++;
-            $this->addIssue('HIGH', 'app/Policies', "[A01] Sin Policies de autorización. Implementa Gates y Policies para control de acceso granular.");
+            $this->addIssue('HIGH', 'app/Policies', "[A01] No authorization Policies found. Implement Gates and Policies for granular access control.");
         }
 
         // Check for missing authorization in controllers
@@ -86,7 +86,7 @@ class OwaspAnalyzer extends BaseAnalyzer
             if ($hasActions && !$hasAuth) {
                 $findings++;
                 $this->addIssue('MEDIUM', $relativePath,
-                    "[A01] Controlador sin checks de autorización visibles. Verifica que usa Policies o Gate::authorize().");
+                    "[A01] Controller with no visible authorization checks. Verify it uses Policies or Gate::authorize().");
             }
         }
 
@@ -104,15 +104,15 @@ class OwaspAnalyzer extends BaseAnalyzer
                 if (!$hasOwnerCheck) {
                     $findings++;
                     $this->addIssue('HIGH', $relativePath,
-                        "[A01] Posible IDOR: Model::find(\$id) sin verificación de ownership. " .
-                        "Verifica que el usuario tiene acceso al recurso: Route Model Binding con Policy.");
+                        "[A01] Possible IDOR: Model::find(\$id) without ownership check. " .
+                        "Verify the user has access to the resource: use Route Model Binding with a Policy.");
                 }
             }
         }
 
         $score = max(0, 100 - ($findings * 15));
         $this->addOwaspResult('A01', 'Broken Access Control', $score, $findings,
-            'Control de acceso deficiente permite a usuarios realizar acciones no autorizadas.');
+            'Weak access control allows users to perform unauthorized actions.');
     }
 
     private function checkA02CryptographicFailures(string $projectPath): void
@@ -128,7 +128,7 @@ class OwaspAnalyzer extends BaseAnalyzer
             if (preg_match_all('/\bmd5\s*\(\s*\$(?:password|pass|pwd|secret|token)/i', $content, $m)) {
                 $findings += count($m[0]);
                 $this->addIssue('CRITICAL', $relativePath,
-                    "[A02] MD5 para datos sensibles. Usa Hash::make() (bcrypt/argon2) para contraseñas.");
+                    "[A02] MD5 for sensitive data. Use Hash::make() (bcrypt/argon2) for passwords.");
             }
 
             // Hardcoded secrets
@@ -137,7 +137,7 @@ class OwaspAnalyzer extends BaseAnalyzer
                     if (!str_contains($match, 'env(') && !str_contains($match, 'config(')) {
                         $findings++;
                         $this->addIssue('CRITICAL', $relativePath,
-                            "[A02] Posible secreto hardcodeado detectado. Mueve todos los secretos a variables de entorno (.env).");
+                            "[A02] Possible hardcoded secret detected. Move all secrets to environment variables (.env).");
                     }
                 }
             }
@@ -146,7 +146,7 @@ class OwaspAnalyzer extends BaseAnalyzer
             if (preg_match_all('/["\']http:\/\/(?!localhost|127\.0\.0\.1)/', $content, $m)) {
                 $findings += count($m[0]);
                 $this->addIssue('LOW', $relativePath,
-                    "[A02] URL HTTP encontrada (no segura). Usa HTTPS para todas las comunicaciones externas.");
+                    "[A02] HTTP URL found (insecure). Use HTTPS for all external communications.");
             }
         }
 
@@ -157,13 +157,13 @@ class OwaspAnalyzer extends BaseAnalyzer
             if (!str_contains($content, 'URL::forceScheme') && !str_contains($content, 'forceHttps')) {
                 $findings++;
                 $this->addIssue('MEDIUM', 'app/Providers/AppServiceProvider.php',
-                    "[A02] No se detecta URL::forceScheme('https'). Agrégate en producción para forzar HTTPS.");
+                    "[A02] URL::forceScheme('https') not detected. Add it in production to enforce HTTPS.");
             }
         }
 
         $score = max(0, 100 - ($findings * 12));
         $this->addOwaspResult('A02', 'Cryptographic Failures', $score, $findings,
-            'Exposición de datos sensibles por fallos criptográficos o datos en texto plano.');
+            'Sensitive data exposed due to cryptographic failures or plain-text data.');
     }
 
     private function checkA03Injection(string $projectPath): void
@@ -178,32 +178,32 @@ class OwaspAnalyzer extends BaseAnalyzer
             // SQL injection
             if (preg_match_all('/DB::(?:select|statement)\s*\(\s*["\'][^"\']*\.\s*\$/', $content, $m)) {
                 $findings += count($m[0]);
-                $this->addIssue('CRITICAL', $relativePath, "[A03] SQL Injection: concatenación en query cruda.");
+                $this->addIssue('CRITICAL', $relativePath, "[A03] SQL Injection: variable concatenated into raw query.");
             }
 
             // Command injection
             if (preg_match_all('/\b(?:exec|shell_exec|system|passthru)\s*\(\s*.*\$/', $content, $m)) {
                 $findings += count($m[0]);
-                $this->addIssue('CRITICAL', $relativePath, "[A03] Command Injection: ejecución de sistema con variable.");
+                $this->addIssue('CRITICAL', $relativePath, "[A03] Command Injection: system execution with variable.");
             }
 
             // LDAP injection (if using LDAP)
             if (preg_match_all('/ldap_search\s*\([^,]+,\s*[^,]+,\s*.*\$/', $content, $m)) {
                 $findings += count($m[0]);
-                $this->addIssue('CRITICAL', $relativePath, "[A03] LDAP Injection posible.");
+                $this->addIssue('CRITICAL', $relativePath, "[A03] Possible LDAP Injection.");
             }
 
             // Object injection via unserialize
             if (preg_match_all('/\bunserialize\s*\(\s*\$(?:request|input|data|payload)/', $content, $m)) {
                 $findings += count($m[0]);
                 $this->addIssue('CRITICAL', $relativePath,
-                    "[A03] Object Injection: unserialize() con datos del usuario es extremadamente peligroso. Usa JSON.");
+                    "[A03] Object Injection: unserialize() with user data is extremely dangerous. Use JSON instead.");
             }
         }
 
         $score = max(0, 100 - ($findings * 20));
         $this->addOwaspResult('A03', 'Injection', $score, $findings,
-            'Datos del usuario enviados a intérpretes como SQL, OS, o LDAP sin sanitización.');
+            'User data sent to interpreters like SQL, OS, or LDAP without sanitization.');
     }
 
     private function checkA04InsecureDesign(string $projectPath): void
@@ -222,7 +222,7 @@ class OwaspAnalyzer extends BaseAnalyzer
                 $findings++;
                 $relativePath = str_replace($projectPath . '/', '', $routeFile);
                 $this->addIssue('HIGH', $relativePath,
-                    "[A04] Sin rate limiting en rutas. Agrega middleware 'throttle:60,1' para prevenir brute force.");
+                    "[A04] No rate limiting on routes. Add 'throttle:60,1' middleware to prevent brute force attacks.");
             }
         }
 
@@ -241,7 +241,7 @@ class OwaspAnalyzer extends BaseAnalyzer
                     if (!$hasValidation) {
                         $findings++;
                         $this->addIssue('HIGH', $relativePath,
-                            "[A04] Método store/update sin validación visible. Usa Form Request Validation o \$request->validate().");
+                            "[A04] store/update method without visible validation. Use Form Request Validation or \$request->validate().");
                     }
                 }
             }
@@ -249,7 +249,7 @@ class OwaspAnalyzer extends BaseAnalyzer
 
         $score = max(0, 100 - ($findings * 10));
         $this->addOwaspResult('A04', 'Insecure Design', $score, $findings,
-            'Falta de controles de diseño seguro: rate limiting, validación, threat modeling.');
+            'Missing secure design controls: rate limiting, input validation, threat modeling.');
     }
 
     private function checkA05SecurityMisconfiguration(string $projectPath): void
@@ -263,11 +263,11 @@ class OwaspAnalyzer extends BaseAnalyzer
 
             if (preg_match('/APP_DEBUG\s*=\s*true/i', $env)) {
                 $findings += 2;
-                $this->addIssue('CRITICAL', '.env', "[A05] APP_DEBUG=true. Deshabilita en producción.");
+                $this->addIssue('CRITICAL', '.env', "[A05] APP_DEBUG=true. Disable in production.");
             }
 
             if (!preg_match('/SESSION_DRIVER\s*=\s*(?:database|redis|memcached)/i', $env)) {
-                $this->addIssue('LOW', '.env', "[A05] SESSION_DRIVER=file puede ser inseguro en servidores compartidos. Usa 'database' o 'redis'.");
+                $this->addIssue('LOW', '.env', "[A05] SESSION_DRIVER=file can be insecure on shared servers. Use 'database' or 'redis'.");
             }
         }
 
@@ -278,7 +278,7 @@ class OwaspAnalyzer extends BaseAnalyzer
             if (!str_contains($content, "'same_site' => 'lax'") && !str_contains($content, "'same_site' => 'strict'")) {
                 $findings++;
                 $this->addIssue('MEDIUM', 'config/session.php',
-                    "[A05] Cookie SameSite no configurado como 'lax' o 'strict'. Protege contra CSRF.");
+                    "[A05] Cookie SameSite not configured as 'lax' or 'strict'. This protects against CSRF.");
             }
         }
 
@@ -288,13 +288,13 @@ class OwaspAnalyzer extends BaseAnalyzer
             $content = $this->readFile($gitignore);
             if (!str_contains($content, '.env')) {
                 $findings++;
-                $this->addIssue('CRITICAL', '.gitignore', "[A05] .env no está en .gitignore. Tus secretos podrían estar en el repositorio.");
+                $this->addIssue('CRITICAL', '.gitignore', "[A05] .env is not in .gitignore. Your secrets could be committed to the repository.");
             }
         }
 
         $score = max(0, 100 - ($findings * 12));
         $this->addOwaspResult('A05', 'Security Misconfiguration', $score, $findings,
-            'Configuración de seguridad incorrecta en la aplicación, framework o servidor.');
+            'Incorrect security configuration in the application, framework, or server.');
     }
 
     private function checkA06VulnerableComponents(string $projectPath): void
@@ -306,7 +306,7 @@ class OwaspAnalyzer extends BaseAnalyzer
 
         if (!file_exists($composerFile)) {
             $this->addOwaspResult('A06', 'Vulnerable & Outdated Components', 50, 1,
-                'No se pudo analizar dependencias (composer.json no encontrado).');
+                'Could not analyze dependencies (composer.json not found).');
             return;
         }
 
@@ -318,7 +318,7 @@ class OwaspAnalyzer extends BaseAnalyzer
             if (in_array($ver, ['*', '@dev', 'dev-master'])) {
                 $findings++;
                 $this->addIssue('HIGH', 'composer.json',
-                    "[A06] Dependencia '{$pkg}' sin versión fija ({$ver}). Fija la versión para evitar actualizaciones automáticas con vulnerabilidades.");
+                    "[A06] Dependency '{$pkg}' has no fixed version ({$ver}). Pin the version to prevent auto-updates with vulnerabilities.");
             }
         }
 
@@ -326,7 +326,7 @@ class OwaspAnalyzer extends BaseAnalyzer
         if (!file_exists($lockFile)) {
             $findings++;
             $this->addIssue('HIGH', 'composer.lock',
-                "[A06] composer.lock no encontrado. Sin él, las dependencias pueden cambiar entre instalaciones.");
+                "[A06] composer.lock not found. Without it, dependencies can change between installations.");
         }
 
         // Check PHP version requirement
@@ -337,16 +337,16 @@ class OwaspAnalyzer extends BaseAnalyzer
                 if ($minVersion < 8.1) {
                     $findings++;
                     $this->addIssue('HIGH', 'composer.json',
-                        "[A06] Versión mínima de PHP {$phpReq} es obsoleta. PHP 8.1+ recibe actualizaciones de seguridad activas.");
+                        "[A06] Minimum PHP version {$phpReq} is outdated. PHP 8.1+ receives active security updates.");
                 }
             }
         }
 
-        $this->addRecommendation("Ejecuta 'composer audit' regularmente para detectar CVEs en dependencias. Integra en CI/CD.");
+        $this->addRecommendation("Run 'composer audit' regularly to detect CVEs in dependencies. Integrate it into CI/CD.");
 
         $score = max(0, 100 - ($findings * 15));
         $this->addOwaspResult('A06', 'Vulnerable & Outdated Components', $score, $findings,
-            'Componentes, librerías y frameworks con vulnerabilidades conocidas sin actualizar.');
+            'Components, libraries, and frameworks with known vulnerabilities that have not been updated.');
     }
 
     private function checkA07AuthFailures(string $projectPath): void
@@ -374,7 +374,7 @@ class OwaspAnalyzer extends BaseAnalyzer
                     $relativePath = str_replace($projectPath . '/', '', $file);
                     $findings++;
                     $this->addIssue('HIGH', $relativePath,
-                        "[A07] Login sin session()->regenerate(). Puede llevar a Session Fixation attacks.");
+                        "[A07] Login without session()->regenerate(). Can lead to Session Fixation attacks.");
                 }
             }
         }
@@ -388,13 +388,13 @@ class OwaspAnalyzer extends BaseAnalyzer
                       str_contains($content, 'filament/fortify');
             if (!$hasMfa) {
                 $this->addIssue('MEDIUM', 'composer.json',
-                    "[A07] Sin MFA detectado. Considera implementar autenticación de dos factores (2FA) con laravel/fortify.");
+                    "[A07] No MFA detected. Consider implementing two-factor authentication (2FA) with laravel/fortify.");
             }
         }
 
         $score = max(0, 100 - ($findings * 15));
         $this->addOwaspResult('A07', 'Identification & Authentication Failures', $score, $findings,
-            'Fallas en la identificación y autenticación de usuarios.');
+            'Failures in user identification and authentication.');
     }
 
     private function checkA08IntegrityFailures(string $projectPath): void
@@ -414,7 +414,7 @@ class OwaspAnalyzer extends BaseAnalyzer
         if (!$hasCi) {
             $findings++;
             $this->addIssue('MEDIUM', '/',
-                "[A08] Sin configuración de CI/CD detectada. Implementa pipelines con 'composer audit' y tests automáticos.");
+                "[A08] No CI/CD configuration detected. Implement pipelines with 'composer audit' and automated tests.");
         }
 
         // Check deserialization
@@ -424,13 +424,13 @@ class OwaspAnalyzer extends BaseAnalyzer
                 $relativePath = str_replace($projectPath . '/', '', $file);
                 $findings += count($m[0]);
                 $this->addIssue('HIGH', $relativePath,
-                    "[A08] Uso de unserialize(). Los datos deserializados pueden llevar a Remote Code Execution. Usa JSON::decode() en su lugar.");
+                    "[A08] Use of unserialize(). Deserialized data can lead to Remote Code Execution. Use json_decode() instead.");
             }
         }
 
         $score = max(0, 100 - ($findings * 20));
         $this->addOwaspResult('A08', 'Software & Data Integrity Failures', $score, $findings,
-            'Código e infraestructura sin protección contra actualizaciones maliciosas.');
+            'Code and infrastructure without protection against malicious updates.');
     }
 
     private function checkA09LoggingFailures(string $projectPath): void
@@ -444,7 +444,7 @@ class OwaspAnalyzer extends BaseAnalyzer
         if (!$hasLogging) {
             $findings++;
             $this->addIssue('HIGH', 'config/logging.php',
-                "[A09] Sin configuración de logging detectada. El logging es crítico para detectar y responder a incidentes.");
+                "[A09] No logging configuration detected. Logging is critical for detecting and responding to incidents.");
         }
 
         // Check for security event logging
@@ -460,8 +460,8 @@ class OwaspAnalyzer extends BaseAnalyzer
         if (!$authEvents) {
             $findings++;
             $this->addIssue('MEDIUM', 'app/',
-                "[A09] Sin logging de eventos de seguridad (fallos de login, acceso no autorizado). " .
-                "Agrega Log::warning() en AuthController y handlers de autorización.");
+                "[A09] No security event logging found (login failures, unauthorized access). " .
+                "Add Log::warning() in AuthController and authorization handlers.");
         }
 
         // Check for log injection
@@ -471,13 +471,13 @@ class OwaspAnalyzer extends BaseAnalyzer
                 $relativePath = str_replace($projectPath . '/', '', $file);
                 $findings++;
                 $this->addIssue('MEDIUM', $relativePath,
-                    "[A09] Posible Log Injection: logging de datos crudos del usuario. Sanitiza antes de loggear.");
+                    "[A09] Possible Log Injection: logging raw user data. Sanitize before logging.");
             }
         }
 
         $score = max(0, 100 - ($findings * 15));
         $this->addOwaspResult('A09', 'Security Logging & Monitoring Failures', $score, $findings,
-            'Falta de logging, monitoreo y alertas para detectar y responder a brechas de seguridad.');
+            'Missing logging, monitoring, and alerts to detect and respond to security breaches.');
     }
 
     private function checkA10SSRF(string $projectPath): void
@@ -492,19 +492,19 @@ class OwaspAnalyzer extends BaseAnalyzer
             if (preg_match_all('/Http::(?:get|post|put|patch|delete)\s*\(\s*\$(?:request|url|endpoint|target)/', $content, $m)) {
                 $findings += count($m[0]);
                 $this->addIssue('HIGH', $relativePath,
-                    "[A10] SSRF: Petición HTTP con URL del usuario. Valida que la URL pertenece a dominios permitidos.");
+                    "[A10] SSRF: HTTP request with user-supplied URL. Validate that the URL belongs to an allowed domain.");
             }
 
             if (preg_match_all('/(?:file_get_contents|curl_setopt|Guzzle|Http::)\s*.*\$(?:url|request->url|request->get\(["\']url)/', $content, $m)) {
                 $findings += count($m[0]);
                 $this->addIssue('HIGH', $relativePath,
-                    "[A10] SSRF potencial: recuperación de recurso remoto con URL del usuario sin validación.");
+                    "[A10] Potential SSRF: fetching a remote resource with a user-supplied URL without validation.");
             }
         }
 
         $score = max(0, 100 - ($findings * 20));
         $this->addOwaspResult('A10', 'Server-Side Request Forgery (SSRF)', $score, $findings,
-            'La aplicación hace peticiones HTTP a URLs controladas por el usuario sin validación.');
+            'The application makes HTTP requests to user-controlled URLs without validation.');
     }
 
     private function addOwaspResult(string $code, string $name, float $score, int $findings, string $description): void

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace LaravelAnalyzer\Analyzers;
 
 /**
- * Analiza el acoplamiento (Coupling) y la cohesión (Cohesion) del código.
+ * Analyzes code Coupling and Cohesion.
  *
- * - Acoplamiento: cuánto depende una clase de otras (bajo es mejor)
- * - Cohesión: cuánto están relacionadas las responsabilidades de una clase (alta es mejor)
- * - Detecta violaciones a Single Responsibility, God Classes, clases demasiado acopladas
+ * - Coupling: how much a class depends on others (lower is better)
+ * - Cohesion: how related a class's responsibilities are (higher is better)
+ * - Detects Single Responsibility violations, God Classes, and over-coupled classes
  */
 class CouplingCohesionAnalyzer extends BaseAnalyzer
 {
@@ -58,7 +58,7 @@ class CouplingCohesionAnalyzer extends BaseAnalyzer
                 $this->addIssue(
                     'HIGH',
                     $relativePath,
-                    "Clase '{$className}' tiene alto acoplamiento ({$coupling} dependencias). Considera usar interfaces o el patrón Facade."
+                    "Class '{$className}' has high coupling ({$coupling} dependencies). Consider using interfaces or the Facade pattern."
                 );
             }
 
@@ -76,8 +76,8 @@ class CouplingCohesionAnalyzer extends BaseAnalyzer
                 $this->addIssue(
                     'CRITICAL',
                     $relativePath,
-                    "God Class detectada: '{$className}' tiene {$methodCount} métodos y {$lineCount} líneas. " .
-                    "Considera dividirla en clases más pequeñas con responsabilidad única (SRP)."
+                    "God Class detected: '{$className}' has {$methodCount} methods and {$lineCount} lines. " .
+                    "Consider splitting it into smaller classes with a single responsibility (SRP)."
                 );
             }
 
@@ -128,7 +128,7 @@ class CouplingCohesionAnalyzer extends BaseAnalyzer
             'long_methods'         => $longMethods,
             'total_methods'        => $totalMethods,
             'worst_offenders'      => array_slice($classDetails, 0, 5),
-        ], sprintf("Acoplamiento promedio: %.1f deps. God classes: %d. Métodos largos: %d.", $avgCoupling, $godClasses, $longMethods));
+        ], sprintf("Average coupling: %.1f deps. God classes: %d. Long methods: %d.", $avgCoupling, $godClasses, $longMethods));
     }
 
     private function calculateCoupling(string $content): int
@@ -209,7 +209,7 @@ class CouplingCohesionAnalyzer extends BaseAnalyzer
                 $this->addIssue(
                     'MEDIUM',
                     $file,
-                    "Método largo: '{$className}::{$methodName}' tiene ~{$methodLines} líneas (max recomendado: " . self::LONG_METHOD_LINE_THRESHOLD . "). Considera extraerlo en métodos más pequeños.",
+                    "Long method: '{$className}::{$methodName}' has ~{$methodLines} lines (recommended max: " . self::LONG_METHOD_LINE_THRESHOLD . "). Consider extracting it into smaller methods.",
                     $startLine
                 );
             }
@@ -221,20 +221,20 @@ class CouplingCohesionAnalyzer extends BaseAnalyzer
     private function generateCouplingRecommendations(float $avgCoupling, int $godClasses, int $longMethods, int $total): void
     {
         if ($avgCoupling > 8) {
-            $this->addRecommendation("Reduce el acoplamiento usando interfaces y el patrón de Repositorio para acceso a datos.");
-            $this->addRecommendation("Usa el Service Container de Laravel para inyección de dependencias en lugar de instanciar clases directamente.");
+            $this->addRecommendation("Reduce coupling by using interfaces and the Repository pattern for data access.");
+            $this->addRecommendation("Use Laravel's Service Container for dependency injection instead of instantiating classes directly.");
         }
 
         if ($godClasses > 0) {
-            $this->addRecommendation("Divide las God Classes aplicando el Principio de Responsabilidad Única (SRP). Extrae servicios específicos.");
-            $this->addRecommendation("Considera usar el patrón Action/UseCase para encapsular lógica de negocio compleja.");
+            $this->addRecommendation("Break up God Classes by applying the Single Responsibility Principle (SRP). Extract specific services.");
+            $this->addRecommendation("Consider using the Action/UseCase pattern to encapsulate complex business logic.");
         }
 
         if ($longMethods > 5) {
-            $this->addRecommendation("Refactoriza métodos largos: cada método debe hacer una sola cosa y caber en una pantalla (< 50 líneas).");
+            $this->addRecommendation("Refactor long methods: each method should do one thing and fit on a screen (< 50 lines).");
         }
 
-        $this->addRecommendation("Aplica el principio SOLID en todas las clases. Usa 'php artisan make:interface' para definir contratos.");
-        $this->addRecommendation("Revisa el uso excesivo de Facades: pueden ocultar dependencias reales. Inyéctalas explícitamente.");
+        $this->addRecommendation("Apply SOLID principles across all classes. Use 'php artisan make:interface' to define contracts.");
+        $this->addRecommendation("Audit excessive Facade usage: Facades can hide real dependencies. Inject them explicitly.");
     }
 }

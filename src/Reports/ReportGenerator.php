@@ -11,11 +11,11 @@ class ReportGenerator
     private string $projectPath;
 
     private const SECTION_LABELS = [
-        'coupling'   => '🔗 Acoplamiento & Cohesión',
-        'testing'    => '🧪 Cobertura de Tests',
-        'debt'       => '💸 Deuda Técnica',
-        'complexity' => '🧮 Complejidad',
-        'security'   => '🔒 Seguridad Laravel',
+        'coupling'   => '🔗 Coupling & Cohesion',
+        'testing'    => '🧪 Test Coverage',
+        'debt'       => '💸 Technical Debt',
+        'complexity' => '🧮 Complexity',
+        'security'   => '🔒 Laravel Security',
         'owasp'      => '🛡️  OWASP Top 10',
     ];
 
@@ -34,7 +34,7 @@ class ReportGenerator
     {
         $color = fn(string $text, string $c) => $noColor ? $text : $this->color($text, $c);
 
-        echo $color("\n📋 REPORTE DE ANÁLISIS DETALLADO\n", 'cyan');
+        echo $color("\n📋 DETAILED ANALYSIS REPORT\n", 'cyan');
         echo str_repeat('═', 60) . PHP_EOL;
 
         foreach ($this->results as $key => $result) {
@@ -50,24 +50,24 @@ class ReportGenerator
 
             echo PHP_EOL;
             echo $color("┌─ {$label}", 'cyan') . PHP_EOL;
-            echo $color("│  Puntuación: ", 'white') . $color(sprintf("%.1f/100", $score), $scoreColor);
-            echo "  Riesgo: " . $color($risk, $scoreColor) . PHP_EOL;
+            echo $color("│  Score: ", 'white') . $color(sprintf("%.1f/100", $score), $scoreColor);
+            echo "  Risk: " . $color($risk, $scoreColor) . PHP_EOL;
             echo $color("│  ", 'cyan') . $this->progressBar($score, $noColor) . PHP_EOL;
 
             if (!empty($result['summary'])) {
-                echo $color("│  Resumen: ", 'white') . wordwrap($result['summary'], 55, "\n│           ", true) . PHP_EOL;
+                echo $color("│  Summary: ", 'white') . wordwrap($result['summary'], 55, "\n│           ", true) . PHP_EOL;
             }
 
             // Show metrics
             if (!empty($result['metrics'])) {
-                echo $color("│\n│  Métricas clave:\n", 'white');
+                echo $color("│\n│  Key metrics:\n", 'white');
                 $this->printMetrics($result['metrics'], $noColor);
             }
 
             // Show top issues
             $criticalIssues = array_filter($result['issues'] ?? [], fn($i) => in_array($i['severity'], ['CRITICAL', 'HIGH']));
             if (!empty($criticalIssues)) {
-                echo $color("│\n│  ⚠ Problemas Críticos/Altos (top 3):\n", 'yellow');
+                echo $color("│\n│  ⚠ Critical/High Issues (top 3):\n", 'yellow');
                 foreach (array_slice(array_values($criticalIssues), 0, 3) as $issue) {
                     $sev = $issue['severity'] === 'CRITICAL' ? '🔴' : '🟠';
                     $msg = wordwrap($issue['message'], 52, "\n│     ", true);
@@ -88,7 +88,7 @@ class ReportGenerator
 
             // Show recommendations (top 2)
             if (!empty($result['recommendations'])) {
-                echo $color("│\n│  💡 Recomendaciones:\n", 'cyan');
+                echo $color("│\n│  💡 Recommendations:\n", 'cyan');
                 foreach (array_slice($result['recommendations'], 0, 2) as $rec) {
                     $msg = wordwrap("• {$rec}", 55, "\n│    ", true);
                     echo "│  {$msg}\n";
@@ -149,13 +149,13 @@ class ReportGenerator
         $project     = basename($this->projectPath);
 
         $md = "# 🔍 Laravel Best Practices Analysis Report\n\n";
-        $md .= "> **Proyecto:** `{$project}` | **Fecha:** {$date} | **Score Global:** " . sprintf("%.1f", $globalScore) . "/100 [{$grade}]\n\n";
+        $md .= "> **Project:** `{$project}` | **Date:** {$date} | **Global Score:** " . sprintf("%.1f", $globalScore) . "/100 [{$grade}]\n\n";
         $md .= "---\n\n";
 
         // Summary table
-        $md .= "## 📊 Resumen Ejecutivo\n\n";
-        $md .= "| Módulo | Score | Riesgo | Issues Críticos |\n";
-        $md .= "|--------|-------|--------|----------------|\n";
+        $md .= "## 📊 Executive Summary\n\n";
+        $md .= "| Module | Score | Risk | Critical Issues |\n";
+        $md .= "|--------|-------|------|----------------|\n";
 
         foreach ($this->results as $key => $result) {
             if (isset($result['error'])) continue;
@@ -174,7 +174,7 @@ class ReportGenerator
             $score = sprintf("%.1f", $result['score'] ?? 0);
 
             $md .= "## {$label}\n\n";
-            $md .= "**Score:** {$score}/100 | **Riesgo:** {$result['risk']}\n\n";
+            $md .= "**Score:** {$score}/100 | **Risk:** {$result['risk']}\n\n";
 
             if (!empty($result['summary'])) {
                 $md .= "> {$result['summary']}\n\n";
@@ -182,7 +182,7 @@ class ReportGenerator
 
             // Metrics
             if (!empty($result['metrics'])) {
-                $md .= "### Métricas\n\n";
+                $md .= "### Metrics\n\n";
                 foreach ($result['metrics'] as $k => $v) {
                     if (is_array($v)) continue;
                     $label_m = ucwords(str_replace('_', ' ', $k));
@@ -194,7 +194,7 @@ class ReportGenerator
             // Issues
             $critIssues = array_filter($result['issues'] ?? [], fn($i) => in_array($i['severity'], ['CRITICAL', 'HIGH']));
             if (!empty($critIssues)) {
-                $md .= "### ⚠ Problemas Críticos/Altos\n\n";
+                $md .= "### ⚠ Critical/High Issues\n\n";
                 foreach (array_slice(array_values($critIssues), 0, 10) as $issue) {
                     $sev = $issue['severity'] === 'CRITICAL' ? '🔴' : '🟠';
                     $md .= "- {$sev} **[{$issue['file']}]** {$issue['message']}\n";
@@ -205,8 +205,8 @@ class ReportGenerator
             // OWASP breakdown
             if ($key === 'owasp' && !empty($result['metrics']['owasp_breakdown'])) {
                 $md .= "### OWASP Top 10 Breakdown\n\n";
-                $md .= "| Categoría | Nombre | Score | Riesgo |\n";
-                $md .= "|-----------|--------|-------|--------|\n";
+                $md .= "| Category | Name | Score | Risk |\n";
+                $md .= "|----------|------|-------|------|\n";
                 foreach ($result['metrics']['owasp_breakdown'] as $code => $owasp) {
                     $md .= "| {$code} | {$owasp['name']} | {$owasp['score']}/100 | {$owasp['risk']} |\n";
                 }
@@ -215,7 +215,7 @@ class ReportGenerator
 
             // Recommendations
             if (!empty($result['recommendations'])) {
-                $md .= "### 💡 Recomendaciones\n\n";
+                $md .= "### 💡 Recommendations\n\n";
                 foreach ($result['recommendations'] as $rec) {
                     $md .= "1. {$rec}\n";
                 }
@@ -225,7 +225,7 @@ class ReportGenerator
             $md .= "---\n\n";
         }
 
-        $md .= "_Generado por Laravel Best Practices Analyzer v1.0.0_\n";
+        $md .= "_Generated by Laravel Best Practices Analyzer v1.0.0_\n";
 
         return $md;
     }
@@ -250,7 +250,7 @@ class ReportGenerator
 
         return <<<HTML
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -271,10 +271,10 @@ class ReportGenerator
   .score-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
   .score-num { font-size: 2rem; font-weight: 700; }
   .risk-badge { padding: 0.2rem 0.7rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-  .risk-BAJO { background: #166534; color: #bbf7d0; }
-  .risk-MEDIO { background: #713f12; color: #fde68a; }
-  .risk-ALTO { background: #7c2d12; color: #fed7aa; }
-  .risk-CRÍTICO { background: #450a0a; color: #fecaca; }
+  .risk-LOW { background: #166534; color: #bbf7d0; }
+  .risk-MEDIUM { background: #713f12; color: #fde68a; }
+  .risk-HIGH { background: #7c2d12; color: #fed7aa; }
+  .risk-CRITICAL { background: #450a0a; color: #fecaca; }
   .progress-bar { width: 100%; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
   .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
   .metrics { font-size: 0.82rem; color: #94a3b8; margin: 0.5rem 0; }
@@ -296,19 +296,19 @@ class ReportGenerator
 <div class="container">
   <div class="header">
     <h1>🔍 Laravel Best Practices Analyzer</h1>
-    <div class="meta">Proyecto: <strong>{$project}</strong> · Generado: {$date}</div>
+    <div class="meta">Project: <strong>{$project}</strong> · Generated: {$date}</div>
     <div style="margin-top:1rem;">
       <span class="global-score">{$globalScore}</span><span style="font-size:2rem;color:#64748b">/100</span>
       <span class="grade-badge">{$grade}</span>
     </div>
   </div>
 
-  <div class="section-title">📊 Análisis por Módulo</div>
+  <div class="section-title">📊 Analysis by Module</div>
   <div class="grid">
     {$sectionsHtml}
   </div>
 
-  <footer>Generado por Laravel Best Practices Analyzer v1.0.0 · {$date}</footer>
+  <footer>Generated by Laravel Best Practices Analyzer v1.0.0 · {$date}</footer>
 </div>
 </body>
 </html>
@@ -341,7 +341,7 @@ HTML;
 
         $owaspHtml = '';
         if ($key === 'owasp' && !empty($result['metrics']['owasp_breakdown'])) {
-            $owaspHtml = "<table class='owasp-table'><tr><th>Código</th><th>Categoría</th><th>Score</th><th>Riesgo</th></tr>";
+            $owaspHtml = "<table class='owasp-table'><tr><th>Code</th><th>Category</th><th>Score</th><th>Risk</th></tr>";
             foreach ($result['metrics']['owasp_breakdown'] as $code => $owasp) {
                 $col = $owasp['score'] >= 80 ? '#22c55e' : ($owasp['score'] >= 60 ? '#f59e0b' : '#ef4444');
                 $owaspHtml .= "<tr><td>{$code}</td><td>{$owasp['name']}</td><td style='color:{$col};font-weight:600'>{$owasp['score']}</td><td><span class='risk-badge risk-{$owasp['risk']}'>{$owasp['risk']}</span></td></tr>";

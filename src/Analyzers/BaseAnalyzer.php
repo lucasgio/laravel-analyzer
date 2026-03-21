@@ -90,10 +90,10 @@ abstract class BaseAnalyzer
     protected function scoreToRisk(float $score): string
     {
         return match(true) {
-            $score >= 80 => 'BAJO',
-            $score >= 60 => 'MEDIO',
-            $score >= 40 => 'ALTO',
-            default      => 'CRÍTICO',
+            $score >= 80 => 'LOW',
+            $score >= 60 => 'MEDIUM',
+            $score >= 40 => 'HIGH',
+            default      => 'CRITICAL',
         };
     }
 

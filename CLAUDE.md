@@ -55,4 +55,4 @@ There are no build, compile, or test steps — this is a distribution-ready tool
 - **Namespace**: `LaravelAnalyzer\` maps to `src/` via PSR-4
 - **No external packages**: Do not add composer dependencies. Any utility needed must be implemented in pure PHP.
 - **Analyzer contract**: Each analyzer's `analyze(string $projectPath): array` must return keys `score` (0–100 int), `metrics` (assoc array), `issues` (array of strings), `recommendations` (array of strings).
-- **README is in Spanish** — keep it that way when editing documentation.
+- **README is in English** — keep it that way when editing documentation.
