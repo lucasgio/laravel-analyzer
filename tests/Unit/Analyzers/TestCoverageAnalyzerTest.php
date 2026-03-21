@@ -181,4 +181,86 @@ class HighQualityTest extends TestCase {
         $this->assertGreaterThan(0, $result['metrics']['feature_tests']);
         $this->assertTrue($result['metrics']['has_factories']);
     }
+
+    // ------------------------------------------------------------------
+    // Auto-generation of coverage report
+    // ------------------------------------------------------------------
+
+    public function testSkipsCoverageGenerationWhenPhpUnitBinaryMissing(): void
+    {
+        // No vendor/bin/phpunit in temp project → generation must be silently skipped
+        $result = $this->analyzer->analyze($this->tempPath());
+
+        $this->assertFalse($result['metrics']['coverage_xml_found']);
+        $this->assertFalse($result['metrics']['coverage_auto_generated']);
+        $this->assertNull($result['metrics']['coverage_generation_warning']);
+    }
+
+    public function testAutoGeneratesCoverageWhenCloverMissing(): void
+    {
+        $cloverXml = '<?xml version="1.0" encoding="UTF-8"?>
+<coverage>
+  <project>
+    <metrics statements="200" coveredstatements="160" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+  </project>
+</coverage>';
+
+        // Stub the phpunit binary so the analyzer triggers auto-generation
+        $this->createFile('vendor/bin/phpunit', '#!/usr/bin/env php');
+
+        // Inject a command runner that simulates a successful phpunit run:
+        // it writes the clover.xml and returns exit code 0
+        $tempPath = $this->tempPath();
+        $this->analyzer->setCommandRunner(function (string $command) use ($tempPath, $cloverXml): array {
+            $cloverPath = $tempPath . '/build/coverage/clover.xml';
+            @mkdir(dirname($cloverPath), 0777, true);
+            file_put_contents($cloverPath, $cloverXml);
+            return ['exit_code' => 0, 'output' => 'OK (10 tests, 30 assertions)'];
+        });
+
+        $result = $this->analyzer->analyze($tempPath);
+
+        $this->assertTrue($result['metrics']['coverage_xml_found']);
+        $this->assertTrue($result['metrics']['coverage_auto_generated']);
+        $this->assertNull($result['metrics']['coverage_generation_warning']);
+        $this->assertSame('80%', $result['metrics']['line_coverage']);
+    }
+
+    public function testReportsWarningWhenTestsFailDuringCoverageGeneration(): void
+    {
+        $this->createFile('vendor/bin/phpunit', '#!/usr/bin/env php');
+
+        // Simulate phpunit exiting with code 1 (test failures)
+        $this->analyzer->setCommandRunner(function (string $command): array {
+            return ['exit_code' => 1, 'output' => "FAILURES!\nTests: 5, Assertions: 8, Failures: 2."];
+        });
+
+        $result = $this->analyzer->analyze($this->tempPath());
+
+        $this->assertFalse($result['metrics']['coverage_xml_found']);
+        $this->assertFalse($result['metrics']['coverage_auto_generated']);
+        $this->assertNotNull($result['metrics']['coverage_generation_warning']);
+        $this->assertStringContainsString('tests failed', strtolower($result['metrics']['coverage_generation_warning']));
+    }
+
+    public function testAnalysisContinuesAfterCoverageGenerationFailure(): void
+    {
+        $this->createFile('phpunit.xml', '<phpunit></phpunit>');
+        $this->createFile('vendor/bin/phpunit', '#!/usr/bin/env php');
+        $this->createFile('tests/Unit/FooTest.php', '<?php class FooTest extends \PHPUnit\Framework\TestCase { public function testFoo(): void { $this->assertTrue(true); } }');
+
+        // Simulate a crash (exit code 2 = configuration error)
+        $this->analyzer->setCommandRunner(function (string $command): array {
+            return ['exit_code' => 2, 'output' => 'PHPUnit configuration error.'];
+        });
+
+        // Must not throw and must still return a valid result
+        $result = $this->analyzer->analyze($this->tempPath());
+
+        $this->assertArrayHasKey('score', $result);
+        $this->assertArrayHasKey('metrics', $result);
+        $this->assertGreaterThanOrEqual(0, $result['score']);
+        $this->assertLessThanOrEqual(100, $result['score']);
+        $this->assertSame(1, $result['metrics']['unit_tests']);
+    }
 }
