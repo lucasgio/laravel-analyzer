@@ -11,6 +11,8 @@ use LaravelAnalyzer\Analyzers\ComplexityAnalyzer;
 use LaravelAnalyzer\Analyzers\SecurityAnalyzer;
 use LaravelAnalyzer\Analyzers\OwaspAnalyzer;
 use LaravelAnalyzer\Reports\ReportGenerator;
+use LaravelAnalyzer\Refactoring\RefactoringPlanGenerator;
+use LaravelAnalyzer\Skills\SkillsInstaller;
 
 class Application
 {
@@ -41,9 +43,18 @@ class Application
             exit(0);
         }
 
+        if (isset($this->options['install_skills'])) {
+            $this->runInstallSkills();
+            exit(0);
+        }
+
         $this->validateProjectPath();
         $this->runAnalysis();
         $this->generateReport();
+
+        if (isset($this->options['refactoring_plan'])) {
+            $this->generateRefactoringPlan();
+        }
     }
 
     private function parseArguments(array $argv): void
@@ -53,7 +64,9 @@ class Application
         for ($i = 1; $i < count($argv); $i++) {
             $arg = $argv[$i];
 
-            if ($arg === '--help' || $arg === '-h') {
+            if ($arg === 'install-skills') {
+                $this->options['install_skills'] = true;
+            } elseif ($arg === '--help' || $arg === '-h') {
                 $this->options['help'] = true;
             } elseif ($arg === '--version' || $arg === '-v') {
                 $this->options['version'] = true;
@@ -75,6 +88,14 @@ class Application
                 $this->options['threshold'] = (int)substr($arg, 12);
             } elseif ($arg === '--no-color') {
                 $this->options['no_color'] = true;
+            } elseif ($arg === '--refactoring-plan' && isset($argv[$i + 1])) {
+                $this->options['refactoring_plan'] = $argv[++$i];
+            } elseif (str_starts_with($arg, '--refactoring-plan=')) {
+                $this->options['refactoring_plan'] = substr($arg, 19);
+            } elseif ($arg === '--skills-only' && isset($argv[$i + 1])) {
+                $this->options['skills_only'] = explode(',', $argv[++$i]);
+            } elseif (str_starts_with($arg, '--skills-only=')) {
+                $this->options['skills_only'] = explode(',', substr($arg, 14));
             } elseif (!str_starts_with($arg, '--')) {
                 $this->projectPath = is_dir($arg) ? realpath($arg) : $arg;
             }
@@ -182,6 +203,49 @@ class Application
         $this->printSummary();
     }
 
+    private function runInstallSkills(): void
+    {
+        $only = $this->options['skills_only'] ?? null;
+
+        echo $this->color("\n🛠  INSTALLING SKILLS\n", 'cyan');
+        echo str_repeat('─', 60) . PHP_EOL;
+
+        $installer = new SkillsInstaller($this->projectPath);
+        $result    = $installer->install($only);
+
+        foreach ($result['log'] as $entry) {
+            echo $this->color("  ✓ ", 'green') . $entry . PHP_EOL;
+        }
+
+        if (!empty($result['skipped'])) {
+            foreach ($result['skipped'] as $label) {
+                echo $this->color("  – Skipped: ", 'yellow') . $label . PHP_EOL;
+            }
+        }
+
+        echo PHP_EOL;
+        $count = count($result['installed']);
+        $this->success("✓ {$count} skill(s) installed in: {$this->projectPath}");
+        echo $this->color("  See AGENT_SETUP.md for usage instructions.\n", 'cyan');
+        echo PHP_EOL;
+    }
+
+    private function generateRefactoringPlan(): void
+    {
+        $outputPath = $this->options['refactoring_plan'];
+        $project    = basename($this->projectPath);
+
+        echo $this->color("\n♻️  GENERATING REFACTORING PLAN\n", 'cyan');
+        echo str_repeat('─', 60) . PHP_EOL;
+
+        $generator = new RefactoringPlanGenerator();
+        $content   = $generator->generate($this->results, $project);
+
+        file_put_contents($outputPath, $content);
+        $this->success("✓ Refactoring plan saved to: {$outputPath}");
+        echo PHP_EOL;
+    }
+
     private function writeOutput(string $content, string $ext): void
     {
         $outputPath = $this->options['output'] ?? "laravel-analysis-report.{$ext}";
@@ -241,15 +305,17 @@ class Application
 
 {$this->color('USAGE:', 'yellow')}
   laravel-analyze [project-path] [options]
+  laravel-analyze install-skills [project-path] [--skills-only=SKILLS]
 
 {$this->color('OPTIONS:', 'yellow')}
-  -h, --help              Show this help message
-  -v, --version           Show CLI version
-  --format=FORMAT         Output format: console (default), json, html, markdown
-  --output=FILE           Output file path
-  --only=MODULES          Run only specific modules (comma-separated)
-  --threshold=N           Minimum quality score threshold (default: 60)
-  --no-color              Disable colored output
+  -h, --help                    Show this help message
+  -v, --version                 Show CLI version
+  --format=FORMAT               Output format: console (default), json, html, markdown
+  --output=FILE                 Output file path
+  --only=MODULES                Run only specific modules (comma-separated)
+  --threshold=N                 Minimum quality score threshold (default: 60)
+  --no-color                    Disable colored output
+  --refactoring-plan=FILE       Generate a phased refactoring plan after analysis
 
 {$this->color('AVAILABLE MODULES:', 'yellow')}
   coupling    Class coupling and cohesion analysis
@@ -259,11 +325,24 @@ class Application
   security    Laravel-specific security risks
   owasp       OWASP Top 10 compliance check
 
+{$this->color('INSTALL-SKILLS SUBCOMMAND:', 'yellow')}
+  Installs Claude Code slash commands and Cursor rules into a Laravel project.
+  --skills-only=SKILLS          Install only specific skills (comma-separated)
+
+{$this->color('AVAILABLE SKILLS:', 'yellow')}
+  laravel       Laravel General Best Practices
+  laravel-api   Laravel API REST Best Practices
+  react         React Best Practices
+  vue-inertia   Vue.js + Inertia.js Best Practices
+
 {$this->color('EXAMPLES:', 'yellow')}
   laravel-analyze /var/www/my-app
   laravel-analyze . --format=html --output=report.html
   laravel-analyze . --only=security,owasp
   laravel-analyze . --format=json --threshold=75
+  laravel-analyze . --refactoring-plan=REFACTORING_PLAN.md
+  laravel-analyze install-skills /var/www/my-app
+  laravel-analyze install-skills . --skills-only=laravel,laravel-api
 
 HELP;
     }
