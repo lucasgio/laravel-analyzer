@@ -15,7 +15,7 @@ use LaravelAnalyzer\Reports\ReportGenerator;
 
 class Application
 {
-    private const VERSION = '1.1.0';
+    private const VERSION = '1.2.0';
     private const BANNER = <<<'BANNER'
     ╔══════════════════════════════════════════════════════════════╗
     ║          Laravel Best Practices Analyzer v%s                 ║
