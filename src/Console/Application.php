@@ -17,7 +17,7 @@ use LaravelAnalyzer\Skills\SkillsInstaller;
 
 class Application
 {
-    private const VERSION = '1.2.0';
+    private const VERSION = '1.3.0';
     private const BANNER = <<<'BANNER'
     ╔══════════════════════════════════════════════════════════════╗
     ║          Laravel Best Practices Analyzer v%s                 ║
